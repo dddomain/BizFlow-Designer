@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow Designer (v5.4)</title>
+    <title>BizFlow Designer (v5.5)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -369,8 +369,6 @@
             stroke: none;
         }
 
-        /* Text Background */
-
         .connector-path {
             fill: none;
             stroke: #64748b;
@@ -439,6 +437,32 @@
             stroke: #3b82f6;
             stroke-width: 1px;
             pointer-events: none;
+        }
+
+        /* Quick Add Handle */
+        .quick-add-handle {
+            fill: #fff;
+            stroke: var(--primary-color);
+            stroke-width: 1px;
+            cursor: pointer;
+            opacity: 0.9;
+            transition: all 0.2s;
+        }
+
+        .quick-add-handle:hover {
+            fill: var(--primary-color);
+            opacity: 1;
+        }
+
+        .quick-add-symbol {
+            pointer-events: none;
+            stroke: var(--primary-color);
+            stroke-width: 2px;
+            stroke-linecap: round;
+        }
+
+        .quick-add-group:hover .quick-add-symbol {
+            stroke: white;
         }
 
         /* =========================================
@@ -642,7 +666,7 @@
                     </svg>
                     BizFlow
                 </div>
-                <div class="app-subtitle">アクティビティ図作成ツール (v5.4)</div>
+                <div class="app-subtitle">アクティビティ図作成ツール (v5.5)</div>
             </div>
 
             <div class="stencil-content">
@@ -677,7 +701,8 @@
                 </div>
                 <div style="height: 50px;"></div>
             </div>
-            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.4</div>
+            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.5 (Quick Add)
+            </div>
         </div>
 
         <!-- CENTER PANEL -->
@@ -863,7 +888,7 @@
                     <div>Ctrl+Z/Y: 元に戻す/やり直し</div>
                     <div>Space+Drag: パン(移動)</div>
                     <div>Drag: 範囲選択</div>
-                    <div>右Clickポート: 図形追加</div>
+                    <div>＋ボタン: 図形追加</div>
                 </div>
             </div>
         </div>
@@ -873,7 +898,7 @@
 
     <script>
         /**
-         * BizFlow Designer - Offline Logic v5.4
+         * BizFlow Designer - Offline Logic v5.5
          */
         const GRID_SIZE = 10;
         const STORAGE_KEY = 'bizflow_offline_data_v5';
@@ -941,14 +966,7 @@
 
                 if (edge.label) {
                     const center = getEdgeLabelPosition(d);
-                    // Adjust position to avoid overlapping line. 
-                    // Simple heuristic: Move up/left slightly or create a bg.
-                    // Request says "adjust position, no bg", but also "option for text bg".
-                    // We'll offset Y by -12px (above line) for horizontal segments usually.
-
-                    // If textBgColor is set, draw rect.
                     if (edge.textBgColor && edge.textBgColor !== 'transparent') {
-                        // Approximate size
                         const lines = edge.label.split('\n');
                         const fs = edge.fontSize || 14;
                         const maxLineLen = Math.max(...lines.map(l => l.length));
@@ -964,8 +982,6 @@
                         bg.setAttribute('height', h);
                         group.appendChild(bg);
                     } else {
-                        // No bg, apply smart offset to avoid line crossing text center
-                        // Heuristic: If horizontal segment, move up. Vertical, move right.
                         if (center.orientation === 'horizontal') center.y -= 10;
                         else center.x += 5;
                     }
@@ -1042,9 +1058,7 @@
                 if (isText) { textX = 0; textY = node.h / 2; anchor = 'start'; }
 
                 if (node.label) {
-                    // Text Background
                     if (node.textBgColor && node.textBgColor !== 'transparent') {
-                        // Calc size approximate
                         const lines = node.label.split('\n');
                         const fs = node.fontSize || 14;
                         const maxLineLen = Math.max(...lines.map(l => l.length));
@@ -1055,17 +1069,13 @@
                         bg.setAttribute('class', 'text-bg-rect');
                         bg.setAttribute('fill', node.textBgColor);
 
-                        // Center bg around text point
                         let bgX = textX - tw / 2;
                         let bgY = textY - th / 2;
-                        // Adjust for anchor
                         if (anchor === 'start') bgX = textX;
                         if (isSwimlane || (!isSwimlane && !isText)) {
-                            // Vertical center fix logic from createMultilineText
                             const totalHeight = (lines.length - 1) * (fs * 1.2);
-                            // Re-calc bgY to match text bounds roughly
                             bgY = textY - totalHeight / 2 - fs / 2;
-                            if (isSwimlane) bgY = textY - fs; // Swimlane title
+                            if (isSwimlane) bgY = textY - fs;
                         }
 
                         bg.setAttribute('x', bgX); bg.setAttribute('y', bgY);
@@ -1094,11 +1104,7 @@
                         port.setAttribute('cx', p.x); port.setAttribute('cy', p.y); port.setAttribute('r', 4);
 
                         port.addEventListener('mousedown', (e) => { e.stopPropagation(); startConnectionDrag(e, node, p); });
-                        port.addEventListener('contextmenu', (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            showQuickAddMenu(e, node, p);
-                        });
+                        port.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); showQuickAddMenu(e, node, p); });
 
                         port.dataset.nodeId = node.id;
                         port.dataset.dir = p.dir;
@@ -1127,6 +1133,44 @@
                 });
                 targetLayer.appendChild(g);
             });
+
+            // Quick Add Handles (For single selection of standard nodes)
+            if (state.selection.length === 1) {
+                const node = state.nodes.find(n => n.id === state.selection[0]);
+                if (node && node.type !== 'swimlane' && node.type !== 'text') {
+                    const padding = 20;
+                    const handles = [
+                        { dir: 'top', x: node.x + node.w / 2, y: node.y - padding },
+                        { dir: 'bottom', x: node.x + node.w / 2, y: node.y + node.h + padding },
+                        { dir: 'left', x: node.x - padding, y: node.y + node.h / 2 },
+                        { dir: 'right', x: node.x + node.w + padding, y: node.y + node.h / 2 }
+                    ];
+
+                    handles.forEach(h => {
+                        const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                        g.setAttribute('class', 'quick-add-group');
+                        g.style.cursor = 'pointer';
+
+                        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        circle.setAttribute('class', 'quick-add-handle');
+                        circle.setAttribute('cx', h.x); circle.setAttribute('cy', h.y); circle.setAttribute('r', 8);
+
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.setAttribute('class', 'quick-add-symbol');
+                        path.setAttribute('d', `M ${h.x - 4} ${h.y} L ${h.x + 4} ${h.y} M ${h.x} ${h.y - 4} L ${h.x} ${h.y + 4}`);
+
+                        g.appendChild(circle);
+                        g.appendChild(path);
+
+                        g.addEventListener('mousedown', (e) => {
+                            e.stopPropagation();
+                            showQuickAddMenu(e, node, { dir: h.dir }, true);
+                        });
+
+                        layerUI.appendChild(g);
+                    });
+                }
+            }
         }
 
         // --- TEXT UTILS ---
@@ -1141,7 +1185,6 @@
 
             const totalHeight = (lines.length - 1) * lineHeight;
             let startY = y;
-            // Adjust vertical center if it's a standard node label
             if (!isSwimlane && !isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3);
             if (isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3);
 
@@ -1195,17 +1238,10 @@
         function getEdgeLabelPosition(d) {
             const points = parsePathPoints(d);
             if (points.length < 2) return { x: 0, y: 0, orientation: 'horizontal' };
-
-            // Find longest segment or middle segment
-            // Simple logic: Middle point of path points array
-            const midIdx = Math.floor(points.length / 2);
-            // Better: geometric middle
-            // But for manhattan, usually the middle segment is key.
-            // If 4 points (3 segments), middle is p[1] to p[2].
             let p1, p2;
             if (points.length === 2) { p1 = points[0]; p2 = points[1]; }
-            else if (points.length === 4) { p1 = points[1]; p2 = points[2]; } // U shape
-            else { p1 = points[0]; p2 = points[points.length - 1]; } // fallback
+            else if (points.length === 4) { p1 = points[1]; p2 = points[2]; }
+            else { p1 = points[0]; p2 = points[points.length - 1]; }
 
             const mx = (p1.x + p2.x) / 2;
             const my = (p1.y + p2.y) / 2;
@@ -1232,9 +1268,11 @@
         }
 
         // --- QUICK ADD ---
-        function showQuickAddMenu(e, node, p) {
+        function showQuickAddMenu(e, node, p, fromHandle = false) {
             state.quickAdd = { visible: true, sourceNodeId: node.id, portDir: p.dir, x: e.clientX, y: e.clientY };
-            quickAddMenu.style.left = e.clientX + 'px'; quickAddMenu.style.top = e.clientY + 'px'; quickAddMenu.style.display = 'grid';
+            quickAddMenu.style.left = e.clientX + 'px';
+            quickAddMenu.style.top = e.clientY + 'px';
+            quickAddMenu.style.display = 'grid';
         }
         function hideQuickAddMenu() { quickAddMenu.style.display = 'none'; state.quickAdd.visible = false; }
 
@@ -1271,6 +1309,7 @@
 
                 state.nodes.push(newNode);
                 state.edges.push({ id: uuid(), source: sourceNode.id, sourcePort: dir, target: newNode.id, targetPort: targetDir, label: '' });
+                state.selection = [newNode.id]; // Select new node
                 saveState(); render(); hideQuickAddMenu();
             });
         });
@@ -1378,7 +1417,7 @@
             }
         });
 
-        // SCROLL (Enhanced)
+        // SCROLL
         wrapperEl.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (e.ctrlKey) {
@@ -1549,7 +1588,6 @@
                     document.getElementById('prop-label').value = el.label || '';
                     document.getElementById('prop-font-size').value = el.fontSize || 14;
                     document.getElementById('prop-text-color').value = el.textColor || '#000000';
-                    // Text BG
                     document.getElementById('prop-text-bg-color').value = (el.textBgColor && el.textBgColor !== 'transparent') ? el.textBgColor : '#ffffff';
 
                     if (node) {
@@ -1648,7 +1686,6 @@
             const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `bizflow_${Date.now()}.json`; a.click();
         });
 
-        // PDF Export Logic: Auto-fit view for printing
         document.getElementById('export-pdf').addEventListener('click', () => {
             if (state.nodes.length === 0) return alert('キャンバスが空です');
             const originalZoom = state.zoom;
@@ -1671,7 +1708,6 @@
             }, 100);
         });
 
-        // Export Logic for Image
         function exportImage(format) {
             exportMenu.style.display = 'none';
             if (state.nodes.length === 0) return alert('キャンバスが空です');
