@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow Designer (v5.2)</title>
+    <title>BizFlow Designer (v5.3)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -54,6 +54,17 @@
             flex-direction: column;
         }
 
+        .h-full {
+            height: 100%;
+        }
+
+        /* Added for scroll fix */
+        .overflow-hidden {
+            overflow: hidden;
+        }
+
+        /* Added for scroll fix */
+
         .items-center {
             align-items: center;
         }
@@ -90,7 +101,6 @@
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
             flex-shrink: 0;
-            /* ヘッダー縮小防止 */
         }
 
         .app-title {
@@ -112,8 +122,8 @@
             flex: 1;
             padding: 1rem;
             background: var(--panel-bg);
+            /* Scroll fix: ensure min-height is 0 to allow shrinking */
             min-height: 0;
-            /* Flexbox内でのスクロールに必須 */
         }
 
         .group-title {
@@ -344,20 +354,7 @@
 
         .node-body {
             stroke: #1e293b;
-            /* stroke-width はJSで制御するためCSSからは削除 */
             vector-effect: non-scaling-stroke;
-        }
-
-        .text-halo {
-            paint-order: stroke fill;
-            stroke: var(--bg-color);
-            stroke-width: 4px;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            font-family: sans-serif;
-            text-anchor: middle;
-            dominant-baseline: middle;
-            pointer-events: none;
         }
 
         .node-label {
@@ -369,6 +366,12 @@
             font-size: 12px;
             fill: #475569;
             font-family: sans-serif;
+        }
+
+        /* Background rect for edge labels */
+        .edge-label-bg {
+            fill: var(--bg-color);
+            stroke: none;
         }
 
         .connector-path {
@@ -632,7 +635,7 @@
 
     <div class="app-container">
         <!-- LEFT PANEL -->
-        <div class="flex flex-col border-r shadow-sm z-10">
+        <div class="flex flex-col border-r shadow-sm z-10 h-full overflow-hidden">
             <div class="panel-header">
                 <div class="app-title">
                     <svg width="24" height="24" viewBox="0 0 256 256" fill="#3b82f6">
@@ -642,7 +645,7 @@
                     </svg>
                     BizFlow
                 </div>
-                <div class="app-subtitle">アクティビティ図作成ツール (v5.2)</div>
+                <div class="app-subtitle">アクティビティ図作成ツール (v5.3)</div>
             </div>
 
             <div class="stencil-content">
@@ -675,12 +678,16 @@
                     </div>
                     <span class="item-label">担当領域</span>
                 </div>
+
+                <!-- Spacer for scroll testing -->
+                <div style="height: 50px;"></div>
             </div>
-            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.2</div>
+            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.3 (Scroll
+                Fixed)</div>
         </div>
 
         <!-- CENTER PANEL -->
-        <div class="flex flex-col relative overflow-hidden">
+        <div class="flex flex-col relative overflow-hidden h-full">
             <div class="toolbar">
                 <div class="flex items-center gap-2">
                     <button id="btn-undo" class="btn-icon" title="元に戻す (Ctrl+Z)" disabled><svg viewBox="0 0 24 24">
@@ -765,7 +772,7 @@
         </div>
 
         <!-- RIGHT PANEL -->
-        <div class="properties-panel border-l z-10">
+        <div class="properties-panel border-l z-10 h-full overflow-hidden">
             <div class="panel-header">
                 <h2 style="font-size: 0.875rem; font-weight: 600;">プロパティ</h2>
             </div>
@@ -830,6 +837,8 @@
                             </div>
                         </div>
                     </div>
+
+                    <div style="height: 50px;"></div> <!-- Spacer -->
                 </div>
             </div>
             <div class="panel-header border-t">
@@ -840,7 +849,7 @@
                     <div>Ctrl+Z/Y: 元に戻す/やり直し</div>
                     <div>Space+Drag: パン(移動)</div>
                     <div>Drag: 範囲選択</div>
-                    <div>DblClickポート: 図形追加</div>
+                    <div>右Clickポート: 図形追加</div>
                 </div>
             </div>
         </div>
@@ -850,7 +859,7 @@
 
     <script>
         /**
-         * BizFlow Designer - Offline Logic v5.2
+         * BizFlow Designer - Offline Logic v5.3
          */
         const GRID_SIZE = 10;
         const STORAGE_KEY = 'bizflow_offline_data_v5';
@@ -914,16 +923,33 @@
                 path.setAttribute('class', `connector-path ${isSelected ? 'selected' : ''}`);
                 const d = getManhattanPath(sourceNode, edge.sourcePort, targetNode, edge.targetPort);
                 path.setAttribute('d', d);
-                // Edge stroke width can be consistent or customizable. Keeping default for edges.
                 group.appendChild(path);
 
                 if (edge.label) {
                     const points = parsePathPoints(d);
                     if (points.length >= 2) {
+                        // Simple midpoint approach
                         const midX = (points[0].x + points[points.length - 1].x) / 2;
                         const midY = (points[0].y + points[points.length - 1].y) / 2;
-                        const text = createMultilineText(edge.label, midX, midY, false, edge.fontSize, edge.textColor);
-                        text.setAttribute('class', 'text-halo edge-label-text');
+
+                        // Create bg rect first
+                        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+                        bg.setAttribute('class', 'edge-label-bg');
+                        // Estimate size
+                        const lines = edge.label.split('\n');
+                        const fs = edge.fontSize || 14;
+                        const maxLineLen = Math.max(...lines.map(l => l.length));
+                        const w = Math.max(20, maxLineLen * (fs * 0.6) + 10);
+                        const h = lines.length * (fs * 1.2) + 4;
+
+                        bg.setAttribute('x', midX - w / 2);
+                        bg.setAttribute('y', midY - h / 2);
+                        bg.setAttribute('width', w);
+                        bg.setAttribute('height', h);
+                        group.appendChild(bg);
+
+                        const text = createMultilineText(edge.label, midX, midY, false, fs, edge.textColor);
+                        text.setAttribute('class', 'edge-label-text');
                         group.appendChild(text);
                     }
                 }
@@ -946,7 +972,6 @@
                 g.dataset.id = node.id;
 
                 let shape = null;
-                // Node Shapes
                 if (node.type === 'circle') {
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                     shape.setAttribute('cx', node.w / 2); shape.setAttribute('cy', node.h / 2);
@@ -964,8 +989,7 @@
                 } else if (isText) {
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     shape.setAttribute('width', node.w); shape.setAttribute('height', node.h);
-                    shape.setAttribute('fill', 'transparent');
-                    shape.setAttribute('stroke', 'none');
+                    shape.setAttribute('fill', 'transparent'); shape.setAttribute('stroke', 'none');
                 } else {
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     shape.setAttribute('width', node.w); shape.setAttribute('height', node.h);
@@ -975,7 +999,6 @@
                 if (shape) {
                     if (!isText) {
                         shape.setAttribute('class', 'node-body');
-                        // Border settings
                         const sw = node.strokeWidth !== undefined ? node.strokeWidth : 2;
                         shape.setAttribute('stroke-width', sw);
                         if (sw === 0) shape.setAttribute('stroke', 'none');
@@ -995,14 +1018,11 @@
                 let textX = node.w / 2;
                 let textY = isSwimlane ? 20 : node.h / 2;
                 let anchor = 'middle';
-                if (isText) {
-                    textX = 0; textY = node.h / 2; anchor = 'start';
-                }
+                if (isText) { textX = 0; textY = node.h / 2; anchor = 'start'; }
 
                 if (node.label) {
                     const text = createMultilineText(node.label, textX, textY, isSwimlane, node.fontSize, node.textColor, isText);
                     text.setAttribute('class', 'node-label');
-                    if (!isText) text.classList.add('text-halo');
                     text.setAttribute('text-anchor', anchor);
                     if (isSwimlane) text.style.fontWeight = 'bold';
                     g.appendChild(text);
@@ -1020,8 +1040,15 @@
                         const port = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                         port.setAttribute('class', 'port');
                         port.setAttribute('cx', p.x); port.setAttribute('cy', p.y); port.setAttribute('r', 4);
+
                         port.addEventListener('mousedown', (e) => { e.stopPropagation(); startConnectionDrag(e, node, p); });
-                        port.addEventListener('dblclick', (e) => { e.stopPropagation(); showQuickAddMenu(e, node, p); });
+                        // Right Click for Quick Add
+                        port.addEventListener('contextmenu', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            showQuickAddMenu(e, node, p);
+                        });
+
                         port.dataset.nodeId = node.id;
                         port.dataset.dir = p.dir;
                         g.appendChild(port);
@@ -1289,15 +1316,8 @@
             } else {
                 let dx = -e.deltaX;
                 let dy = -e.deltaY;
-
-                // Shift + Scroll for Horizontal if not natively supported
-                if (dx === 0 && e.shiftKey) {
-                    dx = -e.deltaY;
-                    dy = 0;
-                }
-
-                state.pan.x += dx;
-                state.pan.y += dy;
+                if (dx === 0 && e.shiftKey) { dx = -e.deltaY; dy = 0; }
+                state.pan.x += dx; state.pan.y += dy;
                 render();
             }
         }, { passive: false });
@@ -1566,16 +1586,11 @@
                 if (n.x + n.w > maxX) maxX = n.x + n.w; if (n.y + n.h > maxY) maxY = n.y + n.h;
             });
             const padding = 20;
-            const contentW = maxX - minX + padding * 2;
-            const contentH = maxY - minY + padding * 2;
 
-            // Fit to View (Simulate Fit)
-            // Center content at (padding, padding) visually relative to origin, then zoom to fit screen roughly or just reset to show all
-            // Actually for printing, we just want to shift the content to top-left (0,0) and scale 1 (or appropriate scale)
-
+            // Reset View for Print
             state.pan.x = -minX + padding;
             state.pan.y = -minY + padding;
-            state.zoom = 1; // You might want to scale this if content is HUGE, but browser print scaling usually handles it better if we provide clean SVG.
+            state.zoom = 1;
 
             render(); // Apply transform
 
@@ -1621,7 +1636,7 @@
             .node-body { stroke: #1e293b; vector-effect: non-scaling-stroke; }
             .connector-path { fill: none; stroke: #64748b; stroke-width: 2px; stroke-linejoin: round; stroke-linecap: round; }
             .node-label, .edge-label-text { font-family: sans-serif; font-size: 14px; fill: #334155; }
-            .text-halo { stroke: ${isPng ? '#ffffff' : '#f0f0f0'}; stroke-width: 4px; }
+            .edge-label-bg { fill: ${isPng ? '#ffffff' : '#f0f0f0'}; stroke: none; }
         `;
             clone.insertBefore(style, clone.firstChild);
 
