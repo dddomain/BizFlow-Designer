@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow Designer (v5.1)</title>
+    <title>BizFlow Designer (v5.2)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -89,6 +89,8 @@
             background-color: #f8fafc;
             padding: 1rem;
             border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            /* ヘッダー縮小防止 */
         }
 
         .app-title {
@@ -110,6 +112,8 @@
             flex: 1;
             padding: 1rem;
             background: var(--panel-bg);
+            min-height: 0;
+            /* Flexbox内でのスクロールに必須 */
         }
 
         .group-title {
@@ -172,7 +176,6 @@
             margin: 4px;
         }
 
-        /* Updated DB Icon CSS for Stencil */
         .shape-db {
             width: 40px;
             height: 40px;
@@ -182,7 +185,6 @@
             position: relative;
             background: white;
             margin-top: 5px;
-            /* Adjust spacing for top ellipse */
         }
 
         .shape-db::before {
@@ -246,6 +248,7 @@
             padding: 0 1rem;
             z-index: 10;
             position: relative;
+            flex-shrink: 0;
         }
 
         .btn-icon {
@@ -330,7 +333,6 @@
             cursor: default;
         }
 
-        /* SVG Styles */
         svg {
             display: block;
             overflow: visible;
@@ -342,7 +344,7 @@
 
         .node-body {
             stroke: #1e293b;
-            stroke-width: 2px;
+            /* stroke-width はJSで制御するためCSSからは削除 */
             vector-effect: non-scaling-stroke;
         }
 
@@ -381,12 +383,12 @@
 
         .connector-path:hover {
             stroke: var(--primary-color);
-            stroke-width: 3px;
+            stroke-width: 3px !important;
         }
 
         .connector-path.selected {
             stroke: var(--primary-color);
-            stroke-width: 3px;
+            stroke-width: 3px !important;
         }
 
         .port {
@@ -410,11 +412,9 @@
 
         .selected .node-body {
             stroke: var(--primary-color);
-            stroke-width: 3px;
             stroke-dasharray: 5 5;
         }
 
-        /* Text Node Selection */
         .selected.text-node .node-label {
             fill: var(--primary-color);
             text-decoration: underline;
@@ -434,7 +434,6 @@
             display: block;
         }
 
-        /* Rubberband Selection */
         .rubberband {
             fill: rgba(59, 130, 246, 0.1);
             stroke: #3b82f6;
@@ -488,7 +487,6 @@
             gap: 0.5rem;
         }
 
-        /* Menus */
         #quick-add-menu {
             position: absolute;
             background: white;
@@ -566,6 +564,11 @@
            Print Styles (PDF/Print)
            ========================================= */
         @media print {
+            @page {
+                size: auto;
+                margin: 0mm;
+            }
+
             body {
                 background: white;
                 overflow: visible;
@@ -579,11 +582,8 @@
                 width: 100%;
             }
 
-            /* Hide UI Elements */
             .flex-col.border-r,
-            /* Left Panel */
             .properties-panel,
-            /* Right Panel */
             .toolbar,
             #toast,
             #quick-add-menu,
@@ -608,10 +608,8 @@
                 height: 100%;
                 overflow: visible;
                 background-color: white;
-                /* Print on white */
             }
 
-            /* Hide Grids and Helpers */
             #bg-rect {
                 fill: white !important;
             }
@@ -620,9 +618,6 @@
                 stroke: none !important;
             }
 
-            /* Hide grid lines */
-
-            /* Hide Interactive Helpers */
             .port,
             .resize-handle,
             .rubberband,
@@ -647,7 +642,7 @@
                     </svg>
                     BizFlow
                 </div>
-                <div class="app-subtitle">アクティビティ図作成ツール (v5.1)</div>
+                <div class="app-subtitle">アクティビティ図作成ツール (v5.2)</div>
             </div>
 
             <div class="stencil-content">
@@ -681,7 +676,7 @@
                     <span class="item-label">担当領域</span>
                 </div>
             </div>
-            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.1 (Fixed)</div>
+            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.2</div>
         </div>
 
         <!-- CENTER PANEL -->
@@ -720,10 +715,10 @@
                 <div class="flex items-center gap-2">
                     <button id="btn-clear" class="btn-text btn-danger">クリア</button>
                     <div class="separator"></div>
-                    <button id="btn-import" class="btn-text btn-secondary">読込 (Load)</button>
+                    <button id="btn-import" class="btn-text btn-secondary">読込</button>
 
                     <div style="position: relative;">
-                        <button id="btn-export-menu" class="btn-text btn-primary">保存 (Export) ▼</button>
+                        <button id="btn-export-menu" class="btn-text btn-primary">保存 ▼</button>
                         <div id="export-menu">
                             <button class="export-item" id="export-json">JSONファイルとして保存</button>
                             <button class="export-item" id="export-png">PNG画像 (背景透過)</button>
@@ -737,17 +732,16 @@
             <div id="canvas-wrapper">
                 <svg id="main-svg" width="100%" height="100%">
                     <defs>
-                        <!-- Grid Pattern -->
                         <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
                             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="1" />
                         </pattern>
                     </defs>
-                    <rect id="bg-rect" width="100%" height="100%" fill="none"></rect> <!-- For events -->
+                    <rect id="bg-rect" width="100%" height="100%" fill="none"></rect>
                     <g id="viewport-group">
                         <g id="layer-swimlanes"></g>
                         <g id="layer-edges"></g>
                         <g id="layer-nodes"></g>
-                        <g id="layer-ui"></g> <!-- Rubberband, Temp lines -->
+                        <g id="layer-ui"></g>
                     </g>
                 </svg>
             </div>
@@ -775,7 +769,7 @@
             <div class="panel-header">
                 <h2 style="font-size: 0.875rem; font-weight: 600;">プロパティ</h2>
             </div>
-            <div style="flex: 1; padding: 1rem; overflow-y: auto;">
+            <div style="flex: 1; padding: 1rem; overflow-y: auto; min-height: 0;">
                 <div id="props-empty"
                     style="text-align: center; color: var(--text-muted); font-style: italic; margin-top: 2rem;">
                     要素を選択すると<br>詳細が表示されます
@@ -820,12 +814,20 @@
                                     id="prop-h" class="prop-input"></div>
                         </div>
                     </div>
-                    <div class="prop-group" id="group-color">
-                        <label class="prop-label">背景色</label>
-                        <div class="color-picker-row">
-                            <input type="color" id="prop-color" style="height: 32px; width: 64px; cursor: pointer;">
-                            <button id="btn-reset-color" class="btn-text btn-secondary"
-                                style="font-size: 0.75rem;">リセット</button>
+
+                    <div class="prop-group" id="group-style">
+                        <label class="prop-label">スタイル</label>
+                        <div style="margin-bottom: 0.5rem;">
+                            <label style="font-size: 0.7rem; color: #94a3b8;">枠線太さ (px)</label>
+                            <input type="number" id="prop-stroke-width" class="prop-input" min="0" max="10" value="2">
+                        </div>
+                        <div>
+                            <label style="font-size: 0.7rem; color: #94a3b8;">背景色</label>
+                            <div class="color-picker-row">
+                                <input type="color" id="prop-color" style="height: 32px; width: 64px; cursor: pointer;">
+                                <button id="btn-reset-color" class="btn-text btn-secondary"
+                                    style="font-size: 0.75rem;">リセット</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -848,7 +850,7 @@
 
     <script>
         /**
-         * BizFlow Designer - Offline Logic v5.1 (Japanese)
+         * BizFlow Designer - Offline Logic v5.2
          */
         const GRID_SIZE = 10;
         const STORAGE_KEY = 'bizflow_offline_data_v5';
@@ -912,6 +914,7 @@
                 path.setAttribute('class', `connector-path ${isSelected ? 'selected' : ''}`);
                 const d = getManhattanPath(sourceNode, edge.sourcePort, targetNode, edge.targetPort);
                 path.setAttribute('d', d);
+                // Edge stroke width can be consistent or customizable. Keeping default for edges.
                 group.appendChild(path);
 
                 if (edge.label) {
@@ -953,20 +956,17 @@
                     const w = node.w, h = node.h;
                     shape.setAttribute('points', `${w / 2},0 ${w},${h / 2} ${w / 2},${h} 0,${h / 2}`);
                 } else if (node.type === 'db') {
-                    // Database shape (Cylinder)
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                     const w = node.w, h = node.h;
                     const ry = h * 0.15;
                     shape.setAttribute('d', `M 0 ${ry} A ${w / 2} ${ry} 0 1 1 ${w} ${ry} A ${w / 2} ${ry} 0 1 1 0 ${ry} z M 0 ${ry} L 0 ${h - ry} A ${w / 2} ${ry} 0 0 0 ${w} ${h - ry} L ${w} ${ry} A ${w / 2} ${ry} 0 0 1 0 ${ry}`);
                     shape.setAttribute('fill-rule', 'evenodd');
                 } else if (isText) {
-                    // Invisible rect for selection hit area
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     shape.setAttribute('width', node.w); shape.setAttribute('height', node.h);
                     shape.setAttribute('fill', 'transparent');
                     shape.setAttribute('stroke', 'none');
                 } else {
-                    // Rect (default)
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     shape.setAttribute('width', node.w); shape.setAttribute('height', node.h);
                     shape.setAttribute('rx', node.type === 'rect' ? 6 : 0);
@@ -975,6 +975,11 @@
                 if (shape) {
                     if (!isText) {
                         shape.setAttribute('class', 'node-body');
+                        // Border settings
+                        const sw = node.strokeWidth !== undefined ? node.strokeWidth : 2;
+                        shape.setAttribute('stroke-width', sw);
+                        if (sw === 0) shape.setAttribute('stroke', 'none');
+
                         if (isSwimlane) {
                             shape.setAttribute('stroke-dasharray', '5 5');
                             shape.setAttribute('fill', node.bgColor || '#f8fafc');
@@ -991,20 +996,19 @@
                 let textY = isSwimlane ? 20 : node.h / 2;
                 let anchor = 'middle';
                 if (isText) {
-                    // Align left for text nodes
                     textX = 0; textY = node.h / 2; anchor = 'start';
                 }
 
                 if (node.label) {
                     const text = createMultilineText(node.label, textX, textY, isSwimlane, node.fontSize, node.textColor, isText);
                     text.setAttribute('class', 'node-label');
-                    if (!isText) text.classList.add('text-halo'); // No halo for text-only nodes usually
+                    if (!isText) text.classList.add('text-halo');
                     text.setAttribute('text-anchor', anchor);
                     if (isSwimlane) text.style.fontWeight = 'bold';
                     g.appendChild(text);
                 }
 
-                // Ports (Not for Swimlane or Text)
+                // Ports
                 if (!isSwimlane && !isText) {
                     const portsCoords = [
                         { x: node.w / 2, y: 0, dir: 'top' },
@@ -1016,17 +1020,15 @@
                         const port = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                         port.setAttribute('class', 'port');
                         port.setAttribute('cx', p.x); port.setAttribute('cy', p.y); port.setAttribute('r', 4);
-
                         port.addEventListener('mousedown', (e) => { e.stopPropagation(); startConnectionDrag(e, node, p); });
                         port.addEventListener('dblclick', (e) => { e.stopPropagation(); showQuickAddMenu(e, node, p); });
-
                         port.dataset.nodeId = node.id;
                         port.dataset.dir = p.dir;
                         g.appendChild(port);
                     });
                 }
 
-                // Resize Handle (Only if single selection)
+                // Resize Handle
                 if (isSelected && state.selection.length === 1 && !isText) {
                     const handle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     handle.setAttribute('class', 'resize-handle');
@@ -1063,7 +1065,7 @@
             const totalHeight = (lines.length - 1) * lineHeight;
             let startY = y;
             if (!isSwimlane && !isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3);
-            if (isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3); // Center vertically in box
+            if (isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3);
 
             lines.forEach((line, i) => {
                 const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
@@ -1115,16 +1117,14 @@
         // --- SELECTION ---
         function handleSelection(e, id) {
             if (e.shiftKey || e.ctrlKey) {
-                // Toggle
                 if (state.selection.includes(id)) {
                     state.selection = state.selection.filter(sid => sid !== id);
                 } else {
                     state.selection.push(id);
                 }
             } else {
-                // If already selected and multiple, preserve selection for drag start
                 if (state.selection.length > 1 && state.selection.includes(id)) {
-                    // Do nothing, wait for drag
+                    // Keep multi selection for drag
                 } else {
                     state.selection = [id];
                 }
@@ -1162,7 +1162,7 @@
                 if (dir === 'right') { nx += (sourceNode.w + offset); ny += (sourceNode.h - h) / 2; }
 
                 const newNode = {
-                    id: uuid(), type: type, x: snap(nx), y: snap(ny), w: w, h: h, label: lbl, bgColor: '#ffffff'
+                    id: uuid(), type: type, x: snap(nx), y: snap(ny), w: w, h: h, label: lbl, bgColor: '#ffffff', strokeWidth: 2
                 };
 
                 let targetDir = 'top';
@@ -1181,7 +1181,6 @@
         function startNodeDrag(e) {
             state.isDragging = true; state.dragTarget = 'node';
             state.dragStart = { rawX: e.clientX, rawY: e.clientY };
-            // Store initial positions of all selected nodes
             state.dragItemOffset = {};
             state.selection.forEach(id => {
                 const n = state.nodes.find(node => node.id === id);
@@ -1211,8 +1210,8 @@
             state.rubberbandRect.setAttribute('x', pos.x); state.rubberbandRect.setAttribute('y', pos.y);
             layerUI.appendChild(state.rubberbandRect);
 
-            if (!e.shiftKey && !e.ctrlKey) state.selection = []; // Clear selection if not additive
-            render(); // update selection visual
+            if (!e.shiftKey && !e.ctrlKey) state.selection = [];
+            render();
         }
         function startPan(e) {
             state.isDragging = true; state.dragTarget = 'pan';
@@ -1273,27 +1272,32 @@
             if (exportMenu.style.display === 'flex') exportMenu.style.display = 'none';
 
             if (e.button === 0) {
-                // Space key held -> Pan
-                if (e.code === 'Space' || e.button === 1) { // 1=Middle Click
+                if (e.code === 'Space' || e.button === 1) {
                     startPan(e);
                 } else if (e.target.id === 'main-svg' || e.target.id === 'bg-rect') {
-                    // Background Click -> Rubberband
                     startRubberband(e);
                 }
             }
         });
 
-        // SCROLL
+        // SCROLL (Enhanced)
         wrapperEl.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (e.ctrlKey) {
-                // Smooth Zoom
-                const delta = e.deltaY > 0 ? -0.05 : 0.05; // Reduced step for smoother zoom
+                const delta = e.deltaY > 0 ? -0.05 : 0.05;
                 setZoom(state.zoom + delta);
             } else {
-                let dx = 0, dy = 0;
-                if (e.shiftKey) dx = -e.deltaY; else dy = -e.deltaY;
-                state.pan.x += dx; state.pan.y += dy;
+                let dx = -e.deltaX;
+                let dy = -e.deltaY;
+
+                // Shift + Scroll for Horizontal if not natively supported
+                if (dx === 0 && e.shiftKey) {
+                    dx = -e.deltaY;
+                    dy = 0;
+                }
+
+                state.pan.x += dx;
+                state.pan.y += dy;
                 render();
             }
         }, { passive: false });
@@ -1305,7 +1309,6 @@
 
             if (e.code === 'Space' && !isInput) wrapperEl.style.cursor = 'grab';
 
-            // Delete
             if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && state.selection.length > 0) {
                 if (confirm('選択項目を削除しますか？')) {
                     state.nodes = state.nodes.filter(n => !state.selection.includes(n.id));
@@ -1315,18 +1318,15 @@
                 }
             }
 
-            // Copy (Ctrl+C)
             if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !isInput) {
                 if (state.selection.length > 0) {
                     const nodesToCopy = state.nodes.filter(n => state.selection.includes(n.id));
-                    // Copy internal edges only
                     const edgesToCopy = state.edges.filter(e => state.selection.includes(e.source) && state.selection.includes(e.target));
                     state.clipboard = JSON.parse(JSON.stringify({ nodes: nodesToCopy, edges: edgesToCopy }));
                     showToast('コピーしました');
                 }
             }
 
-            // Paste (Ctrl+V)
             if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !isInput) {
                 if (state.clipboard) {
                     const idMap = {};
@@ -1344,12 +1344,7 @@
                     });
 
                     state.clipboard.edges.forEach(e => {
-                        const newEdge = {
-                            ...e,
-                            id: uuid(),
-                            source: idMap[e.source],
-                            target: idMap[e.target]
-                        };
+                        const newEdge = { ...e, id: uuid(), source: idMap[e.source], target: idMap[e.target] };
                         if (newEdge.source && newEdge.target) newEdges.push(newEdge);
                     });
 
@@ -1383,16 +1378,13 @@
                     }
                 }
             } else if (state.dragTarget === 'rubberband') {
-                // Select nodes inside rect
                 const r = state.rubberbandRect;
                 const rx = parseFloat(r.getAttribute('x'));
                 const ry = parseFloat(r.getAttribute('y'));
                 const rw = parseFloat(r.getAttribute('width'));
                 const rh = parseFloat(r.getAttribute('height'));
 
-                // Check intersection with nodes
                 state.nodes.forEach(n => {
-                    // Simple box intersection
                     if (n.x < rx + rw && n.x + n.w > rx && n.y < ry + rh && n.y + n.h > ry) {
                         if (!state.selection.includes(n.id)) state.selection.push(n.id);
                     }
@@ -1423,7 +1415,10 @@
             else if (type === 'swimlane') { w = 300; h = 400; lbl = '担当領域'; bg = '#f8fafc'; }
             else if (type === 'text') { w = 120; h = 40; lbl = 'テキスト'; bg = 'transparent'; }
 
-            const newNode = { id: uuid(), type: type, x: snap(pos.x - w / 2), y: snap(pos.y - h / 2), w: w, h: h, label: lbl, bgColor: bg };
+            const newNode = {
+                id: uuid(), type: type, x: snap(pos.x - w / 2), y: snap(pos.y - h / 2), w: w, h: h, label: lbl, bgColor: bg,
+                strokeWidth: 2 // Default border
+            };
             state.nodes.push(newNode); saveState();
             state.selection = [newNode.id];
             render();
@@ -1444,6 +1439,7 @@
             const multi = document.getElementById('props-multi');
             const content = document.getElementById('props-content');
             const dimGroup = document.getElementById('group-dimensions');
+            const styleGroup = document.getElementById('group-style');
 
             if (state.selection.length === 0) {
                 empty.style.display = 'block'; multi.style.display = 'none'; content.style.display = 'none';
@@ -1465,11 +1461,14 @@
 
                     if (node) {
                         dimGroup.style.display = 'block';
+                        styleGroup.style.display = 'block';
                         document.getElementById('prop-w').value = node.w;
                         document.getElementById('prop-h').value = node.h;
                         document.getElementById('prop-color').value = node.bgColor || '#ffffff';
+                        document.getElementById('prop-stroke-width').value = node.strokeWidth !== undefined ? node.strokeWidth : 2;
                     } else {
                         dimGroup.style.display = 'none';
+                        styleGroup.style.display = 'none';
                     }
                 }
             }
@@ -1495,7 +1494,9 @@
         document.getElementById('prop-label').addEventListener('change', saveState);
         document.getElementById('prop-font-size').addEventListener('input', (e) => { updateSelectedProps('fontSize', e.target.value, true); saveState(); });
         document.getElementById('prop-text-color').addEventListener('input', (e) => { updateSelectedProps('textColor', e.target.value); saveState(); });
+
         document.getElementById('prop-color').addEventListener('input', (e) => { updateSelectedProps('bgColor', e.target.value); saveState(); });
+        document.getElementById('prop-stroke-width').addEventListener('input', (e) => { updateSelectedProps('strokeWidth', e.target.value, true); saveState(); });
         document.getElementById('btn-reset-color').addEventListener('click', () => { updateSelectedProps('bgColor', '#ffffff'); document.getElementById('prop-color').value = '#ffffff'; saveState(); });
 
         document.getElementById('prop-w').addEventListener('input', (e) => {
@@ -1549,10 +1550,47 @@
             const b = new Blob([JSON.stringify({ nodes: state.nodes, edges: state.edges }, null, 2)], { type: 'application/json' });
             const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = `bizflow_${Date.now()}.json`; a.click();
         });
-        document.getElementById('export-pdf').addEventListener('click', () => window.print());
+
+        // PDF Export Logic: Auto-fit view for printing
+        document.getElementById('export-pdf').addEventListener('click', () => {
+            if (state.nodes.length === 0) return alert('キャンバスが空です');
+
+            // Save current view
+            const originalZoom = state.zoom;
+            const originalPan = { ...state.pan };
+
+            // Calculate Bounds
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            state.nodes.forEach(n => {
+                if (n.x < minX) minX = n.x; if (n.y < minY) minY = n.y;
+                if (n.x + n.w > maxX) maxX = n.x + n.w; if (n.y + n.h > maxY) maxY = n.y + n.h;
+            });
+            const padding = 20;
+            const contentW = maxX - minX + padding * 2;
+            const contentH = maxY - minY + padding * 2;
+
+            // Fit to View (Simulate Fit)
+            // Center content at (padding, padding) visually relative to origin, then zoom to fit screen roughly or just reset to show all
+            // Actually for printing, we just want to shift the content to top-left (0,0) and scale 1 (or appropriate scale)
+
+            state.pan.x = -minX + padding;
+            state.pan.y = -minY + padding;
+            state.zoom = 1; // You might want to scale this if content is HUGE, but browser print scaling usually handles it better if we provide clean SVG.
+
+            render(); // Apply transform
+
+            // Print
+            setTimeout(() => {
+                window.print();
+                // Restore view
+                state.pan = originalPan;
+                state.zoom = originalZoom;
+                render();
+            }, 100);
+        });
 
         // Export Logic for Image
-        function exportImage(format) { // format: 'image/png' or 'image/jpeg'
+        function exportImage(format) {
             exportMenu.style.display = 'none';
             if (state.nodes.length === 0) return alert('キャンバスが空です');
 
@@ -1578,12 +1616,11 @@
             const bgColor = isPng ? 'transparent' : '#f0f0f0';
             clone.style.background = bgColor;
 
-            // Fix Text Color for Image Export: Force default fill to black if not set
             const style = document.createElement('style');
             style.textContent = `
-            .node-body { stroke: #1e293b; stroke-width: 2px; vector-effect: non-scaling-stroke; fill: white; }
+            .node-body { stroke: #1e293b; vector-effect: non-scaling-stroke; }
             .connector-path { fill: none; stroke: #64748b; stroke-width: 2px; stroke-linejoin: round; stroke-linecap: round; }
-            .node-label, .edge-label-text { font-family: sans-serif; font-size: 14px; fill: #334155; } /* Default text color */
+            .node-label, .edge-label-text { font-family: sans-serif; font-size: 14px; fill: #334155; }
             .text-halo { stroke: ${isPng ? '#ffffff' : '#f0f0f0'}; stroke-width: 4px; }
         `;
             clone.insertBefore(style, clone.firstChild);
@@ -1596,10 +1633,8 @@
                 const ctx = canvas.getContext('2d');
 
                 if (!isPng) {
-                    // Draw BG and Grid for JPEG
                     ctx.fillStyle = '#f0f0f0';
                     ctx.fillRect(0, 0, width, height);
-                    // Draw Grid
                     ctx.strokeStyle = '#e2e8f0';
                     ctx.lineWidth = 1;
                     ctx.beginPath();
