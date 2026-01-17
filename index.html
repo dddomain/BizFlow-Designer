@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BizFlow Designer (v7.2 Improved)</title>
+    <title>BizFlow Designer (v7.4 Fixed)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -250,6 +250,19 @@
             z-index: 10;
             position: relative;
             flex-shrink: 0;
+            overflow-x: auto;
+            /* 横スクロール対応 */
+            white-space: nowrap;
+        }
+
+        /* スクロールバーのスタイル調整 */
+        .toolbar::-webkit-scrollbar {
+            height: 4px;
+        }
+
+        .toolbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 2px;
         }
 
         .btn-icon {
@@ -262,6 +275,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
 
         .btn-icon:hover:not(:disabled) {
@@ -284,6 +298,7 @@
             height: 24px;
             background: var(--border-color);
             margin: 0 0.5rem;
+            flex-shrink: 0;
         }
 
         .btn-text {
@@ -293,6 +308,8 @@
             cursor: pointer;
             border: 1px solid transparent;
             position: relative;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .btn-primary {
@@ -320,6 +337,25 @@
 
         .btn-danger:hover {
             background-color: #fef2f2;
+        }
+
+        /* AI Button Style */
+        .btn-ai-prompt {
+            background: linear-gradient(135deg, #8b5cf6, #d946ef);
+            color: white;
+            border: none;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(139, 92, 246, 0.3);
+            transition: transform 0.1s, box-shadow 0.1s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-ai-prompt:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(139, 92, 246, 0.4);
+            opacity: 0.95;
         }
 
         #canvas-wrapper {
@@ -680,11 +716,13 @@
             border-color: var(--primary-color);
         }
 
+        /* UPDATE: Export Menu Fixed Positioning */
         #export-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            margin-top: 4px;
+            position: fixed;
+            /* absolute -> fixed */
+            top: 0;
+            left: 0;
+            margin-top: 0;
             background: white;
             border: 1px solid var(--border-color);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -692,7 +730,8 @@
             width: 180px;
             display: none;
             flex-direction: column;
-            z-index: 100;
+            z-index: 1000;
+            /* ツールバーより確実に上に */
         }
 
         .export-item {
@@ -724,6 +763,41 @@
             z-index: 200;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-textarea {
+            width: 100%;
+            height: 200px;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
         /* Print */
         @media print {
             @page {
@@ -749,7 +823,8 @@
             .toolbar,
             #toast,
             #quick-add-menu,
-            #export-menu {
+            #export-menu,
+            #ai-prompt-modal {
                 display: none !important;
             }
 
@@ -804,7 +879,7 @@
                     </svg>
                     BizFlow
                 </div>
-                <div class="app-subtitle">アクティビティ図作成ツール (v7.2)</div>
+                <div class="app-subtitle">アクティビティ図作成ツール (v7.4)</div>
             </div>
 
             <div class="stencil-content">
@@ -836,7 +911,7 @@
                     <span class="item-label">テキスト</span>
                 </div>
 
-                <!-- アイコンを塗りつぶしデザインに変更済み (v7.1) -->
+                <!-- アイコン -->
                 <div class="group-title">アイコン (改良版)</div>
                 <div class="dnd-item" draggable="true" data-type="icon-pc" title="パソコン">
                     <div class="svg-icon-container">
@@ -920,21 +995,26 @@
                         </svg></button>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="btn-clear" class="btn-text btn-danger">クリア</button>
+                    <button id="btn-ai-prompt" class="btn-text btn-ai-prompt">✨ AIを使って作成</button>
+                    <div class="separator"></div>
+                    <button id="btn-clear" class="btn-text btn-danger">全削除</button>
                     <div class="separator"></div>
                     <button id="btn-import" class="btn-text btn-secondary">JSONから読込</button>
 
                     <div style="position: relative;">
                         <button id="btn-export-menu" class="btn-text btn-primary">保存 ▼</button>
-                        <div id="export-menu">
-                            <button class="export-item" id="export-json">JSONファイルとして保存</button>
-                            <button class="export-item" id="export-png">PNG画像 (背景透過)</button>
-                            <button class="export-item" id="export-jpeg">JPEG画像 (背景あり)</button>
-                            <button class="export-item" id="export-svg">SVG形式で保存 (New)</button>
-                            <button class="export-item" id="export-pdf">PDF印刷 / 保存</button>
-                        </div>
+                        <!-- Export menu will be positioned by JS -->
                     </div>
                 </div>
+            </div>
+
+            <!-- Export Menu (Moved out of toolbar flow visually, though structurally here, CSS makes it fixed) -->
+            <div id="export-menu">
+                <button class="export-item" id="export-json">JSONファイルとして保存</button>
+                <button class="export-item" id="export-png">PNG画像 (背景透過)</button>
+                <button class="export-item" id="export-jpeg">JPEG画像 (背景あり)</button>
+                <button class="export-item" id="export-svg">SVG形式で保存 (New)</button>
+                <button class="export-item" id="export-pdf">PDF印刷 / 保存</button>
             </div>
 
             <div id="canvas-wrapper">
@@ -943,7 +1023,6 @@
                         <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
                             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="1" />
                         </pattern>
-                        <!-- Markers (サイズ縮小: 10->7) -->
                         <marker id="arrow-end" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"
                             markerUnits="strokeWidth">
                             <path d="M0,0 L0,7 L7,3.5 z" fill="#64748b" />
@@ -1080,7 +1159,6 @@
                         <label class="prop-label">スタイル</label>
                         <div style="margin-bottom: 0.5rem;">
                             <label style="font-size: 0.7rem; color: #94a3b8;">枠線太さ (px)</label>
-                            <!-- UPDATE: 0.5刻みに変更 -->
                             <input type="number" id="prop-stroke-width" class="prop-input" min="0" max="10" step="0.5"
                                 value="2">
                         </div>
@@ -1091,7 +1169,6 @@
                                 <button id="btn-reset-color" class="btn-text btn-secondary"
                                     style="font-size: 0.75rem;">リセット</button>
                             </div>
-                            <!-- パステルカラーパレットの追加 -->
                             <div class="color-palette" id="color-palette">
                                 <div class="color-swatch" style="background: #fee2e2;" data-color="#fee2e2"
                                     title="Red 100"></div>
@@ -1129,10 +1206,121 @@
         </div>
     </div>
 
+    <!-- AI Prompt Modal -->
+    <div id="ai-prompt-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px; font-weight: bold; color: #334155;">AIプロンプト作成テンプレート</h3>
+            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">
+                以下のテキストをコピーして、ChatGPTやClaudeなどのAIに貼り付けて指示を出してください。
+            </p>
+            <textarea id="ai-prompt-text" class="modal-textarea">
+# **業務フローの内容**
+
+{{{{{ここに業務フローの内容を記述}}}}} (例：社内のPCセットアップ業務。管理者がPCを準備し、ユーザーに書類を渡す。その後ユーザーが受領確認を行う。)
+
+# **命令**
+
+あなたは業務フロー図作成ツール「BizFlow Designer」のデータ生成エンジンです。 上記の【業務フローの内容】を読み解き、定義された【JSONフォーマット仕様】に厳密に従ってJSONデータを出力してください。
+
+# **制約条件とルール**
+
+1. **座標計算（重要）**:  
+   * 各ノードは重ならないように配置すること。  
+   * 業務の流れに従って、**左から右へ**、または**上から下へ**順序よく座標(x, y)を計算して設定すること。  
+   * 座標は `x: 0, y: 0` から `x: 800, y: 600` 程度の範囲に収めること。  
+2. **配線の最適化（重要）**:  
+   * 複数の接続線が特定の図形に集中する場合、線が重なって視認性が落ちるのを防ぐため、後述する\*\*拡張ポート（`top-L`, `top-R`など）\*\*を積極的に使い分けること。  
+3. **ID**: 全てユニークな文字列にすること（例: `node_1`, `edge_1`）。  
+4. **JSON形式**: 出力はJSONデータのみとすること（解説不要）。
+
+# **JSONフォーマット仕様**
+
+以下の仕様に従ってください。
+
+## **1\. ノード定義 (nodes)**
+
+各図形は以下のプロパティを持ちます。
+
+* `type`: 図形の種類（以下のリストから適切なものを選択）  
+  * `circle`: 開始 / 終了 (サイズ推奨: w:60, h:60)  
+  * `rect`: 処理 (サイズ推奨: w:120, h:60)  
+  * `diamond`: 判断 (サイズ推奨: w:80, h:80)  
+  * `db`: データストア (サイズ推奨: w:60, h:60)  
+  * `swimlane`: 担当領域/スイムレーン (サイズ推奨: w:300\~600, h:400)  
+  * `text`: テキストメモ  
+  * `icon-pc`: PCアイコン  
+  * `icon-doc`: 書類アイコン  
+  * `icon-server`: サーバーアイコン  
+  * `icon-user`: ユーザーアイコン  
+* `x`, `y`: 配置座標 (数値)  
+* `w`, `h`: 幅と高さ (数値)  
+  * **注記**: 上記の推奨サイズはあくまで目安です。ラベルの文字数が多い場合や、レイアウトの規模・内容に応じて、**視認しやすいサイズに適宜変更・拡大しても構いません**。  
+* `label`: 表示するテキスト (改行は `\n`)  
+* `bgColor`: 背景色 (任意。例: `#ffffff`, `#dbeafe`(青系), `#ffe4e6`(赤系))
+
+## **2\. 接続定義 (edges)**
+
+ノード間の接続線です。各図形の4面（上下左右）には、それぞれ3つずつの接続点（ポート）が存在します。
+
+* `source`: 接続元のノードID  
+* `target`: 接続先のノードID  
+* `sourcePort`, `targetPort`: 接続位置  
+  * 以下の12種類から選択可能です。線が重ならないように使い分けてください。  
+  * **上辺**: `top` (中央), `top-L` (左寄り), `top-R` (右寄り)  
+  * **下辺**: `bottom` (中央), `bottom-L` (左寄り), `bottom-R` (右寄り)  
+  * **左辺**: `left` (中央), `left-L` (上寄り), `left-R` (下寄り)  
+  * **右辺**: `right` (中央), `right-L` (上寄り), `right-R` (下寄り)  
+  * ※ `-L` や `-R` は、その辺に向かって立ったときの左右を指します（例: `top-L` は上辺の左側）。  
+* `label`: 線の上に表示する文字（条件分岐の「Yes/No」など）
+
+# **出力JSONスキーマ**
+
+{  
+  "nodes": \[  
+    {  
+      "id": "node\_start",  
+      "type": "circle",  
+      "x": 100,  
+      "y": 100,  
+      "w": 60,  
+      "h": 60,  
+      "label": "開始",  
+      "bgColor": "\#ffffff"  
+    }  
+    // ...他のノード  
+  \],  
+  "edges": \[  
+    {  
+      "id": "edge\_1",  
+      "source": "node\_start",  
+      "sourcePort": "right",   
+      "target": "node\_process\_1",  
+      "targetPort": "left-L",   
+      "label": ""  
+    },  
+    {  
+      "id": "edge\_2",  
+      "source": "node\_start",  
+      "sourcePort": "right",   
+      "target": "node\_process\_2",  
+      "targetPort": "left-R",   
+      "label": ""  
+    }  
+    // ...他のエッジ  
+  \]  
+}
+            </textarea>
+            <div class="flex justify-end gap-2" style="justify-content: flex-end;">
+                <button id="btn-copy-prompt" class="btn-text btn-primary">コピー</button>
+                <button id="btn-close-modal" class="btn-text btn-secondary">閉じる</button>
+            </div>
+        </div>
+    </div>
+
     <input type="file" id="file-input" accept=".json" style="display: none;">
 
     <script>
-        /** BizFlow Designer - Offline Logic v7.2 Improved */
+        /** BizFlow Designer - Offline Logic v7.4 Improved */
         const GRID_SIZE = 10;
         const STORAGE_KEY = 'bizflow_offline_data_v7';
         const MIN_SIZE = 24;
@@ -1842,8 +2030,6 @@
             setTimeout(() => t.style.opacity = '0', 2000);
         }
         function setZoom(v) { state.zoom = Math.max(0.2, Math.min(3, v)); document.getElementById('zoom-level').textContent = Math.round(state.zoom * 100) + '%'; render(); }
-
-        // UPDATE: isNumeric (was isInt) and parseFloat for decimal stroke width
         function updateSelectedProps(key, value, isNumeric = false) {
             let changed = false;
             state.selection.forEach(id => {
@@ -1858,7 +2044,7 @@
 
         // --- EVENT LISTENERS ---
 
-        // Toolbar
+        // Toolbar Buttons
         document.getElementById('btn-undo').addEventListener('click', undo);
         document.getElementById('btn-redo').addEventListener('click', redo);
         document.getElementById('btn-home').addEventListener('click', () => { state.pan = { x: 0, y: 0 }; state.zoom = 1; setZoom(1); });
@@ -1866,6 +2052,50 @@
         document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(state.zoom + 0.1));
         document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(state.zoom - 0.1));
         document.getElementById('btn-fit').addEventListener('click', () => { state.zoom = 1; state.pan = { x: 0, y: 0 }; setZoom(1); });
+
+        // UPDATE: AI Modal Logic
+        const modal = document.getElementById('ai-prompt-modal');
+        document.getElementById('btn-ai-prompt').addEventListener('click', () => { modal.style.display = 'flex'; });
+        document.getElementById('btn-close-modal').addEventListener('click', () => { modal.style.display = 'none'; });
+        document.getElementById('btn-copy-prompt').addEventListener('click', () => {
+            const textarea = document.getElementById('ai-prompt-text');
+            textarea.select();
+            document.execCommand('copy');
+            showToast('コピーしました');
+        });
+        modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+
+        // UPDATE: Export Menu Positioning Logic (Fix for overflow clipping)
+        const btnExportMenu = document.getElementById('btn-export-menu');
+        // NOTE: exportMenu is already defined in DOM Elements section
+
+        btnExportMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = exportMenu.style.display === 'flex';
+
+            if (isVisible) {
+                exportMenu.style.display = 'none';
+            } else {
+                // Calculate position relative to viewport because it's fixed
+                const rect = btnExportMenu.getBoundingClientRect();
+                exportMenu.style.top = (rect.bottom + 4) + 'px';
+                // Align right edge of menu with right edge of button
+                // width is 180px
+                exportMenu.style.left = (rect.right - 180) + 'px';
+                exportMenu.style.display = 'flex';
+            }
+        });
+
+        // Close export menu on interaction outside
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('#btn-export-menu') && !e.target.closest('#export-menu')) {
+                exportMenu.style.display = 'none';
+            }
+        });
+        // Also close on scroll or resize to prevent floating menu issues
+        window.addEventListener('scroll', () => { if (exportMenu.style.display === 'flex') exportMenu.style.display = 'none'; }, true);
+        window.addEventListener('resize', () => { if (exportMenu.style.display === 'flex') exportMenu.style.display = 'none'; });
+
 
         // Properties
         document.getElementById('prop-label').addEventListener('input', (e) => updateSelectedProps('label', e.target.value));
@@ -2013,7 +2243,7 @@
 
         svgEl.addEventListener('mousedown', (e) => {
             if (state.quickAdd.visible) hideQuickAddMenu();
-            if (exportMenu.style.display === 'flex') exportMenu.style.display = 'none';
+            // exportMenu logic moved to window click listener
             if (e.button === 0) {
                 if (e.code === 'Space' || e.button === 1) startPan(e);
                 else if (e.target.id === 'main-svg' || e.target.id === 'bg-rect') startRubberband(e);
@@ -2180,9 +2410,7 @@
         });
 
         // Export & Init
-        const btnExportMenu = document.getElementById('btn-export-menu');
-        btnExportMenu.addEventListener('click', (e) => { e.stopPropagation(); exportMenu.style.display = exportMenu.style.display === 'flex' ? 'none' : 'flex'; });
-        window.addEventListener('click', (e) => { if (!e.target.closest('#btn-export-menu')) exportMenu.style.display = 'none'; });
+        // Note: Event Listeners for Export Buttons are defined in the specific block above
 
         document.getElementById('export-json').addEventListener('click', () => {
             const b = new Blob([JSON.stringify({ nodes: state.nodes, edges: state.edges }, null, 2)], { type: 'application/json' });
