@@ -3,8 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BizFlow Designer (v5.5)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BizFlow Designer (v6.1)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -19,6 +19,7 @@
             --primary-hover: #2563eb;
             --grid-color: #cbd5e1;
             --selection-color: #3b82f6;
+            --drag-placeholder: #eff6ff;
         }
 
         * {
@@ -34,6 +35,8 @@
             overflow: hidden;
             background-color: var(--bg-color);
             user-select: none;
+            touch-action: none;
+            /* ブラウザ標準のタッチ操作を無効化 */
         }
 
         /* =========================================
@@ -182,28 +185,18 @@
             margin: 4px;
         }
 
-        .shape-db {
+        .svg-icon-container {
             width: 40px;
             height: 40px;
-            border: 2px solid #1e293b;
-            border-top: none;
-            border-radius: 0 0 10px 10px;
-            position: relative;
-            background: white;
-            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .shape-db::before {
-            content: '';
-            position: absolute;
-            top: -7px;
-            left: -2px;
-            width: 40px;
-            height: 14px;
-            border: 2px solid #1e293b;
-            border-radius: 50%;
-            background: white;
-            box-sizing: border-box;
+        .svg-icon-container svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
         }
 
         .shape-swimlane {
@@ -367,6 +360,7 @@
         .text-bg-rect {
             fill-opacity: 1;
             stroke: none;
+            rx: 2px;
         }
 
         .connector-path {
@@ -466,12 +460,54 @@
         }
 
         /* =========================================
-           Right Panel (Properties)
+           Right Panel (Tabs & Content)
            ========================================= */
         .properties-panel {
             background: var(--panel-bg);
             display: flex;
             flex-direction: column;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            background: #f8fafc;
+            flex-shrink: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 0.75rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background: #f1f5f9;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+            background: white;
+        }
+
+        .panel-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            min-height: 0;
+        }
+
+        .panel-content.active {
+            display: block;
         }
 
         .prop-group {
@@ -509,6 +545,66 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
+        }
+
+        .layer-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            margin-bottom: 4px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 4px;
+            cursor: grab;
+            font-size: 0.8rem;
+        }
+
+        .layer-item:hover {
+            border-color: var(--primary-color);
+        }
+
+        .layer-item:active {
+            cursor: grabbing;
+        }
+
+        .layer-item.dragging {
+            opacity: 0.5;
+            background: var(--drag-placeholder);
+        }
+
+        .layer-item-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .layer-icon {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .layer-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .layer-handle {
+            color: #cbd5e1;
+            cursor: grab;
         }
 
         #quick-add-menu {
@@ -584,9 +680,7 @@
             z-index: 200;
         }
 
-        /* =========================================
-           Print Styles (PDF/Print)
-           ========================================= */
+        /* Print */
         @media print {
             @page {
                 size: auto;
@@ -666,7 +760,7 @@
                     </svg>
                     BizFlow
                 </div>
-                <div class="app-subtitle">アクティビティ図作成ツール (v5.5)</div>
+                <div class="app-subtitle">アクティビティ図作成ツール (v6.1)</div>
             </div>
 
             <div class="stencil-content">
@@ -684,7 +778,13 @@
                     <span class="item-label">判断</span>
                 </div>
                 <div class="dnd-item" draggable="true" data-type="db" title="データストア">
-                    <div class="shape-preview shape-db"></div>
+                    <div class="svg-icon-container">
+                        <svg viewBox="0 0 40 40">
+                            <path
+                                d="M 0 6 A 20 6 0 1 1 40 6 A 20 6 0 1 1 0 6 z M 0 6 L 0 34 A 20 6 0 0 0 40 34 L 40 6 A 20 6 0 0 1 0 6"
+                                fill="white" stroke="#1e293b" stroke-width="2"></path>
+                        </svg>
+                    </div>
                     <span class="item-label">データストア</span>
                 </div>
                 <div class="dnd-item" draggable="true" data-type="text" title="テキスト">
@@ -701,8 +801,7 @@
                 </div>
                 <div style="height: 50px;"></div>
             </div>
-            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v5.5 (Quick Add)
-            </div>
+            <div class="panel-header" style="text-align: center; font-size: 0.75rem; color: #94a3b8;">v6.1 Fixed</div>
         </div>
 
         <!-- CENTER PANEL -->
@@ -741,7 +840,7 @@
                 <div class="flex items-center gap-2">
                     <button id="btn-clear" class="btn-text btn-danger">クリア</button>
                     <div class="separator"></div>
-                    <button id="btn-import" class="btn-text btn-secondary">読込</button>
+                    <button id="btn-import" class="btn-text btn-secondary">JSONから読込</button>
 
                     <div style="position: relative;">
                         <button id="btn-export-menu" class="btn-text btn-primary">保存 ▼</button>
@@ -761,6 +860,15 @@
                         <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
                             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="1" />
                         </pattern>
+                        <!-- Markers -->
+                        <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"
+                            markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+                        </marker>
+                        <marker id="arrow-start" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"
+                            markerUnits="strokeWidth">
+                            <path d="M9,0 L9,6 L0,3 z" fill="#64748b" />
+                        </marker>
                     </defs>
                     <rect id="bg-rect" width="100%" height="100%" fill="none"></rect>
                     <g id="viewport-group">
@@ -780,7 +888,13 @@
                     <div class="shape-preview shape-diamond" style="width:20px; height:20px;"></div>
                 </div>
                 <div class="quick-add-item" data-type="db" title="DBを追加">
-                    <div class="shape-preview shape-db" style="width:20px; height:20px; transform:scale(0.6);"></div>
+                    <div class="svg-icon-container" style="transform: scale(0.6);">
+                        <svg viewBox="0 0 40 40">
+                            <path
+                                d="M 0 6 A 20 6 0 1 1 40 6 A 20 6 0 1 1 0 6 z M 0 6 L 0 34 A 20 6 0 0 0 40 34 L 40 6 A 20 6 0 0 1 0 6"
+                                fill="white" stroke="#1e293b" stroke-width="2"></path>
+                        </svg>
+                    </div>
                 </div>
                 <div class="quick-add-item" data-type="circle" title="終了を追加">
                     <div class="shape-preview shape-circle" style="width:20px; height:20px;"></div>
@@ -792,10 +906,14 @@
 
         <!-- RIGHT PANEL -->
         <div class="properties-panel border-l z-10 h-full overflow-hidden">
-            <div class="panel-header">
-                <h2 style="font-size: 0.875rem; font-weight: 600;">プロパティ</h2>
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="prop">プロパティ</button>
+                <button class="tab-btn" data-tab="layer">レイヤー</button>
             </div>
-            <div style="flex: 1; padding: 1rem; overflow-y: auto; min-height: 0;">
+
+            <!-- Property Tab -->
+            <div id="tab-prop" class="panel-content active">
                 <div id="props-empty"
                     style="text-align: center; color: var(--text-muted); font-style: italic; margin-top: 2rem;">
                     要素を選択すると<br>詳細が表示されます
@@ -805,7 +923,8 @@
                     複数項目を選択中
                 </div>
                 <div id="props-content" style="display: none;">
-                    <div class="prop-group">
+                    <!-- Node Specific -->
+                    <div id="group-node-type" class="prop-group">
                         <label class="prop-label">種類 (Type)</label>
                         <select id="prop-type" class="prop-input">
                             <option value="rect">処理 (Action)</option>
@@ -814,6 +933,15 @@
                             <option value="db">データストア (DB)</option>
                             <option value="text">テキスト (Text)</option>
                             <option value="swimlane">担当領域 (Swimlane)</option>
+                        </select>
+                    </div>
+                    <div id="group-edge-style" class="prop-group" style="display:none;">
+                        <label class="prop-label">マーカー (矢印)</label>
+                        <select id="prop-edge-marker" class="prop-input">
+                            <option value="none">なし</option>
+                            <option value="end">終了点のみ (→)</option>
+                            <option value="start">開始点のみ (←)</option>
+                            <option value="both">両端 (↔)</option>
                         </select>
                     </div>
                     <div class="prop-group">
@@ -826,7 +954,6 @@
                         <textarea id="prop-label" rows="3" class="prop-input"></textarea>
                         <div class="helper-text">キャンバス上でダブルクリックで編集可</div>
                     </div>
-
                     <div class="prop-group">
                         <label class="prop-label">フォント設定</label>
                         <div class="dimension-inputs">
@@ -850,7 +977,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="prop-group" id="group-dimensions">
                         <label class="prop-label">サイズ</label>
                         <div class="dimension-inputs">
@@ -860,7 +986,6 @@
                                     id="prop-h" class="prop-input"></div>
                         </div>
                     </div>
-
                     <div class="prop-group" id="group-style">
                         <label class="prop-label">スタイル</label>
                         <div style="margin-bottom: 0.5rem;">
@@ -876,19 +1001,27 @@
                             </div>
                         </div>
                     </div>
-
                     <div style="height: 50px;"></div>
                 </div>
             </div>
+
+            <!-- Layer Tab -->
+            <div id="tab-layer" class="panel-content">
+                <div style="font-size:0.75rem; color:#64748b; margin-bottom:0.5rem;">上にある項目が手前に表示されます。<br>ドラッグで順序変更可能です。
+                </div>
+                <ul id="layer-list" class="layer-list"></ul>
+            </div>
+
             <div class="panel-header border-t">
                 <div style="font-size: 0.75rem; font-weight: 600;">ショートカット</div>
                 <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; line-height: 1.5;">
                     <div>Delete: 削除</div>
+                    <div>Ctrl+A: 全選択</div>
                     <div>Ctrl+C/V: コピー/貼付</div>
                     <div>Ctrl+Z/Y: 元に戻す/やり直し</div>
                     <div>Space+Drag: パン(移動)</div>
                     <div>Drag: 範囲選択</div>
-                    <div>＋ボタン: 図形追加</div>
+                    <div>右Clickポート: 図形追加</div>
                 </div>
             </div>
         </div>
@@ -897,31 +1030,22 @@
     <input type="file" id="file-input" accept=".json" style="display: none;">
 
     <script>
-        /**
-         * BizFlow Designer - Offline Logic v5.5
-         */
+        /** BizFlow Designer - Offline Logic v6.1 */
         const GRID_SIZE = 10;
-        const STORAGE_KEY = 'bizflow_offline_data_v5';
+        const STORAGE_KEY = 'bizflow_offline_data_v6';
         const MIN_SIZE = 40;
 
+        // Global State
         const state = {
-            nodes: [],
-            edges: [],
-            zoom: 1,
-            pan: { x: 0, y: 0 },
-            selection: [],
-            clipboard: null,
-            history: [],
-            historyIndex: -1,
-            isDragging: false,
-            dragTarget: null,
-            dragStart: { x: 0, y: 0, rawX: 0, rawY: 0 },
-            dragItemOffset: {},
-            tempLine: null,
-            rubberbandRect: null,
-            quickAdd: { visible: false, sourceNodeId: null, portDir: null, x: 0, y: 0 }
+            nodes: [], edges: [], zoom: 1, pan: { x: 0, y: 0 },
+            selection: [], clipboard: null, history: [], historyIndex: -1,
+            isDragging: false, dragTarget: null, dragStart: { x: 0, y: 0, rawX: 0, rawY: 0 },
+            dragItemOffset: {}, tempLine: null, rubberbandRect: null,
+            quickAdd: { visible: false, sourceNodeId: null, portDir: null, x: 0, y: 0 },
+            activeTab: 'prop', layerDragIdx: null
         };
 
+        // DOM Elements
         const svgEl = document.getElementById('main-svg');
         const viewportEl = document.getElementById('viewport-group');
         const layerSwimlanes = document.getElementById('layer-swimlanes');
@@ -931,76 +1055,244 @@
         const wrapperEl = document.getElementById('canvas-wrapper');
         const quickAddMenu = document.getElementById('quick-add-menu');
         const exportMenu = document.getElementById('export-menu');
+        const layerListEl = document.getElementById('layer-list');
 
+        // --- UTILS ---
         const uuid = () => 'id-' + Math.random().toString(36).substr(2, 9);
         const snap = (val) => Math.round(val / GRID_SIZE) * GRID_SIZE;
 
+        function getMousePos(evt) {
+            let cx, cy;
+            // Support touch events or Mouse events
+            if (evt.touches && evt.touches.length > 0) {
+                cx = evt.touches[0].clientX; cy = evt.touches[0].clientY;
+            } else if (evt.clientX !== undefined) {
+                cx = evt.clientX; cy = evt.clientY;
+            } else {
+                return { x: 0, y: 0 };
+            }
+
+            const CTM = svgEl.getScreenCTM();
+            if (!CTM) return { x: 0, y: 0 };
+            return {
+                x: (cx - CTM.e - state.pan.x) / state.zoom,
+                y: (cy - CTM.f - state.pan.y) / state.zoom
+            };
+        }
+
+        function createMultilineText(text, x, y, isSwimlane, size, color, isTextNode) {
+            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            const lines = text.split('\n');
+            const fontSize = size || 14;
+            const lineHeight = fontSize * 1.2;
+            t.style.fontSize = fontSize + 'px';
+            if (color) t.style.fill = color;
+
+            let startY = y;
+            if (!isSwimlane && !isTextNode) startY = y - ((lines.length - 1) * lineHeight) / 2 + (fontSize * 0.35);
+            if (isTextNode) startY = y - ((lines.length - 1) * lineHeight) / 2 + (fontSize * 0.35);
+
+            lines.forEach((line, i) => {
+                const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
+                tspan.textContent = line;
+                tspan.setAttribute('x', x);
+                tspan.setAttribute('dy', i === 0 ? 0 : lineHeight);
+                if (i === 0) tspan.setAttribute('y', startY);
+                t.appendChild(tspan);
+            });
+            return t;
+        }
+
+        function parsePathPoints(d) {
+            const parts = d.split(' ');
+            const points = [];
+            for (let i = 0; i < parts.length; i += 3) {
+                if (parts[i] === 'M' || parts[i] === 'L') points.push({ x: parseFloat(parts[i + 1]), y: parseFloat(parts[i + 2]) });
+            }
+            return points;
+        }
+
+        function getEdgeLabelPosition(d) {
+            const points = parsePathPoints(d);
+            if (points.length < 2) return { x: 0, y: 0, orientation: 'horizontal' };
+            let p1, p2;
+            if (points.length === 2) { p1 = points[0]; p2 = points[1]; }
+            else if (points.length >= 4) {
+                const mid = Math.floor(points.length / 2);
+                if (mid > 0) { p1 = points[mid - 1]; p2 = points[mid]; } else { p1 = points[0]; p2 = points[1]; }
+            } else { p1 = points[0]; p2 = points[points.length - 1]; }
+
+            const mx = (p1.x + p2.x) / 2;
+            const my = (p1.y + p2.y) / 2;
+            const orientation = Math.abs(p1.x - p2.x) > Math.abs(p1.y - p2.y) ? 'horizontal' : 'vertical';
+            return { x: mx, y: my, orientation };
+        }
+
+        function getPortPos(node, dir) {
+            if (!dir) return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
+            if (dir === 'top') return { x: node.x + node.w / 2, y: node.y };
+            if (dir === 'right') return { x: node.x + node.w, y: node.y + node.h / 2 };
+            if (dir === 'bottom') return { x: node.x + node.w / 2, y: node.y + node.h };
+            if (dir === 'left') return { x: node.x, y: node.y + node.h / 2 };
+            return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
+        }
+
+        function getManhattanPath(source, sourceDir, target, targetDir) {
+            const s = getPortPos(source, sourceDir);
+            const t = getPortPos(target, targetDir);
+            const stub = 20;
+            let sx = s.x, sy = s.y;
+            if (sourceDir === 'top') sy -= stub; else if (sourceDir === 'bottom') sy += stub; else if (sourceDir === 'left') sx -= stub; else if (sourceDir === 'right') sx += stub;
+            let tx = t.x, ty = t.y;
+            if (targetDir === 'top') ty -= stub; else if (targetDir === 'bottom') ty += stub; else if (targetDir === 'left') tx -= stub; else if (targetDir === 'right') tx += stub;
+
+            let d = `M ${s.x} ${s.y} L ${sx} ${sy}`;
+            const mx = (sx + tx) / 2; const my = (sy + ty) / 2;
+
+            if ((sourceDir === 'left' || sourceDir === 'right') && (targetDir === 'left' || targetDir === 'right')) {
+                d += ` L ${mx} ${sy} L ${mx} ${ty} L ${tx} ${ty}`;
+            } else if ((sourceDir === 'top' || sourceDir === 'bottom') && (targetDir === 'top' || targetDir === 'bottom')) {
+                d += ` L ${sx} ${my} L ${tx} ${my} L ${tx} ${ty}`;
+            } else {
+                let simpleL = false;
+                if (sourceDir === 'right' && tx > sx) simpleL = true;
+                if (sourceDir === 'left' && tx < sx) simpleL = true;
+                if (sourceDir === 'bottom' && ty > sy) simpleL = true;
+                if (sourceDir === 'top' && ty < sy) simpleL = true;
+                if (simpleL) {
+                    if (sourceDir === 'left' || sourceDir === 'right') d += ` L ${tx} ${sy} L ${tx} ${ty}`; else d += ` L ${sx} ${ty} L ${tx} ${ty}`;
+                } else {
+                    if (sourceDir === 'left' || sourceDir === 'right') d += ` L ${mx} ${sy} L ${mx} ${ty} L ${tx} ${ty}`; else d += ` L ${sx} ${my} L ${tx} ${my} L ${tx} ${ty}`;
+                }
+            }
+            d += ` L ${t.x} ${t.y}`;
+            return d;
+        }
+
+        // --- UI Update ---
+        function updateLayerPanel() {
+            if (!layerListEl) return;
+            layerListEl.innerHTML = '';
+            const indexedNodes = state.nodes.map((n, i) => ({ ...n, _idx: i }));
+            const reversed = indexedNodes.reverse();
+            reversed.forEach((node) => {
+                const li = document.createElement('li');
+                li.className = 'layer-item';
+                li.draggable = true;
+                li.dataset.id = node.id;
+                let iconChar = '⬜';
+                if (node.type === 'circle') iconChar = '⚪'; if (node.type === 'diamond') iconChar = '◇'; if (node.type === 'db') iconChar = '🛢️'; if (node.type === 'swimlane') iconChar = '☰'; if (node.type === 'text') iconChar = 'T';
+                const label = node.label ? node.label.replace(/\n/g, ' ') : `(No Label)`;
+                li.innerHTML = `<div class="layer-item-content"><span class="layer-icon">${iconChar}</span><span class="layer-name">${label}</span></div><span class="layer-handle">☰</span>`;
+                li.addEventListener('dragstart', (e) => {
+                    state.layerDragIdx = node._idx;
+                    li.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move';
+                });
+                li.addEventListener('dragend', () => { li.classList.remove('dragging'); state.layerDragIdx = null; });
+                li.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; });
+                li.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const fromIdx = state.layerDragIdx; const toIdx = node._idx;
+                    if (fromIdx !== null && fromIdx !== toIdx) {
+                        const movedNode = state.nodes[fromIdx];
+                        state.nodes.splice(fromIdx, 1);
+                        state.nodes.splice(toIdx, 0, movedNode);
+                        saveState(); render();
+                    }
+                });
+                li.addEventListener('click', (e) => { handleSelection(e, node.id); });
+                if (state.selection.includes(node.id)) { li.style.borderColor = 'var(--primary-color)'; li.style.backgroundColor = '#f0f9ff'; }
+                layerListEl.appendChild(li);
+            });
+        }
+
+        function updatePropsPanel() {
+            const empty = document.getElementById('props-empty');
+            const multi = document.getElementById('props-multi');
+            const content = document.getElementById('props-content');
+            const dimGroup = document.getElementById('group-dimensions');
+            const styleGroup = document.getElementById('group-style');
+            const edgeGroup = document.getElementById('group-edge-style');
+            const nodeTypeGroup = document.getElementById('group-node-type');
+
+            if (state.selection.length === 0) {
+                empty.style.display = 'block'; multi.style.display = 'none'; content.style.display = 'none';
+            } else if (state.selection.length > 1) {
+                empty.style.display = 'none'; multi.style.display = 'block'; content.style.display = 'none';
+            } else {
+                empty.style.display = 'none'; multi.style.display = 'none'; content.style.display = 'block';
+                const id = state.selection[0];
+                const node = state.nodes.find(n => n.id === id);
+                const edge = state.edges.find(e => e.id === id);
+                const el = node || edge;
+                if (el) {
+                    document.getElementById('prop-id').value = el.id;
+                    document.getElementById('prop-label').value = el.label || '';
+                    document.getElementById('prop-font-size').value = el.fontSize || 14;
+                    document.getElementById('prop-text-color').value = el.textColor || '#000000';
+                    document.getElementById('prop-text-bg-color').value = (el.textBgColor && el.textBgColor !== 'transparent') ? el.textBgColor : '#ffffff';
+                    if (node) {
+                        nodeTypeGroup.style.display = 'block'; edgeGroup.style.display = 'none';
+                        dimGroup.style.display = 'block'; styleGroup.style.display = 'block';
+                        document.getElementById('prop-type').value = node.type;
+                        document.getElementById('prop-w').value = node.w;
+                        document.getElementById('prop-h').value = node.h;
+                        document.getElementById('prop-color').value = node.bgColor || '#ffffff';
+                        document.getElementById('prop-stroke-width').value = node.strokeWidth !== undefined ? node.strokeWidth : 2;
+                    } else if (edge) {
+                        nodeTypeGroup.style.display = 'none'; dimGroup.style.display = 'none';
+                        styleGroup.style.display = 'none'; edgeGroup.style.display = 'block';
+                        document.getElementById('prop-edge-marker').value = edge.marker || 'end';
+                    }
+                }
+            }
+        }
+
         // --- RENDER ---
         function render() {
-            layerSwimlanes.innerHTML = '';
-            layerNodes.innerHTML = '';
-            layerEdges.innerHTML = '';
+            layerSwimlanes.innerHTML = ''; layerNodes.innerHTML = ''; layerEdges.innerHTML = '';
             const tempChildren = Array.from(layerUI.children);
-            tempChildren.forEach(c => {
-                if (c !== state.tempLine && c !== state.rubberbandRect) layerUI.removeChild(c);
-            });
-
+            tempChildren.forEach(c => { if (c !== state.tempLine && c !== state.rubberbandRect) layerUI.removeChild(c); });
             viewportEl.setAttribute('transform', `translate(${state.pan.x}, ${state.pan.y}) scale(${state.zoom})`);
 
-            // Edges
             state.edges.forEach(edge => {
                 const sourceNode = state.nodes.find(n => n.id === edge.source);
                 const targetNode = state.nodes.find(n => n.id === edge.target);
                 if (!sourceNode || !targetNode) return;
-
                 const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                group.dataset.id = edge.id;
-                group.style.cursor = 'pointer';
-
+                group.dataset.id = edge.id; group.style.cursor = 'pointer';
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
                 const isSelected = state.selection.includes(edge.id);
                 path.setAttribute('class', `connector-path ${isSelected ? 'selected' : ''}`);
                 const d = getManhattanPath(sourceNode, edge.sourcePort, targetNode, edge.targetPort);
                 path.setAttribute('d', d);
+                const markerType = edge.marker || 'end';
+                if (markerType === 'end' || markerType === 'both') path.setAttribute('marker-end', 'url(#arrow-end)');
+                if (markerType === 'start' || markerType === 'both') path.setAttribute('marker-start', 'url(#arrow-start)');
                 group.appendChild(path);
-
                 if (edge.label) {
                     const center = getEdgeLabelPosition(d);
                     if (edge.textBgColor && edge.textBgColor !== 'transparent') {
-                        const lines = edge.label.split('\n');
-                        const fs = edge.fontSize || 14;
+                        const lines = edge.label.split('\n'); const fs = edge.fontSize || 14;
                         const maxLineLen = Math.max(...lines.map(l => l.length));
-                        const w = Math.max(20, maxLineLen * (fs * 0.6) + 10);
-                        const h = lines.length * (fs * 1.2) + 4;
-
+                        const w = Math.max(20, maxLineLen * (fs * 0.6) + 10); const h = lines.length * (fs * 1.2) + 4;
                         const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                        bg.setAttribute('class', 'text-bg-rect');
-                        bg.setAttribute('fill', edge.textBgColor);
-                        bg.setAttribute('x', center.x - w / 2);
-                        bg.setAttribute('y', center.y - h / 2);
-                        bg.setAttribute('width', w);
-                        bg.setAttribute('height', h);
+                        bg.setAttribute('class', 'text-bg-rect'); bg.setAttribute('fill', edge.textBgColor);
+                        bg.setAttribute('x', center.x - w / 2); bg.setAttribute('y', center.y - h / 2);
+                        bg.setAttribute('width', w); bg.setAttribute('height', h);
                         group.appendChild(bg);
                     } else {
-                        if (center.orientation === 'horizontal') center.y -= 10;
-                        else center.x += 5;
+                        if (center.orientation === 'horizontal') center.y -= 10; else center.x += 5;
                     }
-
-                    const text = createMultilineText(edge.label, center.x, center.y, false, edge.fontSize, edge.textColor, false, !!edge.textBgColor);
-                    text.setAttribute('class', 'edge-label-text');
-                    group.appendChild(text);
+                    const text = createMultilineText(edge.label, center.x, center.y, false, edge.fontSize, edge.textColor, false);
+                    text.setAttribute('class', 'edge-label-text'); group.appendChild(text);
                 }
-                group.addEventListener('mousedown', (e) => {
-                    handleSelection(e, edge.id);
-                    e.stopPropagation();
-                });
+                group.addEventListener('mousedown', (e) => { handleSelection(e, edge.id); e.stopPropagation(); });
                 layerEdges.appendChild(group);
             });
 
-            // Nodes
             state.nodes.forEach(node => {
-                const isSwimlane = node.type === 'swimlane';
-                const isText = node.type === 'text';
+                const isSwimlane = node.type === 'swimlane'; const isText = node.type === 'text';
                 const targetLayer = isSwimlane ? layerSwimlanes : layerNodes;
                 const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 const isSelected = state.selection.includes(node.id);
@@ -1019,8 +1311,7 @@
                     shape.setAttribute('points', `${w / 2},0 ${w},${h / 2} ${w / 2},${h} 0,${h / 2}`);
                 } else if (node.type === 'db') {
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                    const w = node.w, h = node.h;
-                    const ry = h * 0.15;
+                    const w = node.w, h = node.h; const ry = h * 0.15;
                     shape.setAttribute('d', `M 0 ${ry} A ${w / 2} ${ry} 0 1 1 ${w} ${ry} A ${w / 2} ${ry} 0 1 1 0 ${ry} z M 0 ${ry} L 0 ${h - ry} A ${w / 2} ${ry} 0 0 0 ${w} ${h - ry} L ${w} ${ry} A ${w / 2} ${ry} 0 0 1 0 ${ry}`);
                     shape.setAttribute('fill-rule', 'evenodd');
                 } else if (isText) {
@@ -1032,14 +1323,12 @@
                     shape.setAttribute('width', node.w); shape.setAttribute('height', node.h);
                     shape.setAttribute('rx', node.type === 'rect' ? 6 : 0);
                 }
-
                 if (shape) {
                     if (!isText) {
                         shape.setAttribute('class', 'node-body');
                         const sw = node.strokeWidth !== undefined ? node.strokeWidth : 2;
                         shape.setAttribute('stroke-width', sw);
                         if (sw === 0) shape.setAttribute('stroke', 'none');
-
                         if (isSwimlane) {
                             shape.setAttribute('stroke-dasharray', '5 5');
                             shape.setAttribute('fill', node.bgColor || '#f8fafc');
@@ -1051,80 +1340,48 @@
                     g.appendChild(shape);
                 }
 
-                // Label
-                let textX = node.w / 2;
-                let textY = isSwimlane ? 20 : node.h / 2;
-                let anchor = 'middle';
+                let textX = node.w / 2; let textY = isSwimlane ? 20 : node.h / 2; let anchor = 'middle';
                 if (isText) { textX = 0; textY = node.h / 2; anchor = 'start'; }
-
                 if (node.label) {
                     if (node.textBgColor && node.textBgColor !== 'transparent') {
-                        const lines = node.label.split('\n');
-                        const fs = node.fontSize || 14;
+                        const lines = node.label.split('\n'); const fs = node.fontSize || 14;
                         const maxLineLen = Math.max(...lines.map(l => l.length));
-                        const tw = Math.max(20, maxLineLen * (fs * 0.6) + 10);
-                        const th = lines.length * (fs * 1.2) + 4;
-
+                        const tw = Math.max(20, maxLineLen * (fs * 0.7) + 10);
+                        const th = lines.length * (fs * 1.3) + 4;
                         const bg = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                        bg.setAttribute('class', 'text-bg-rect');
-                        bg.setAttribute('fill', node.textBgColor);
-
-                        let bgX = textX - tw / 2;
-                        let bgY = textY - th / 2;
-                        if (anchor === 'start') bgX = textX;
-                        if (isSwimlane || (!isSwimlane && !isText)) {
-                            const totalHeight = (lines.length - 1) * (fs * 1.2);
-                            bgY = textY - totalHeight / 2 - fs / 2;
-                            if (isSwimlane) bgY = textY - fs;
-                        }
-
-                        bg.setAttribute('x', bgX); bg.setAttribute('y', bgY);
-                        bg.setAttribute('width', tw); bg.setAttribute('height', th);
+                        bg.setAttribute('class', 'text-bg-rect'); bg.setAttribute('fill', node.textBgColor);
+                        let bgX = textX - tw / 2; let bgY = textY - th / 2;
+                        if (anchor === 'start') bgX = textX - 2;
+                        if (isSwimlane) bgY = textY - fs; else if (isText) bgY = textY - (lines.length * (fs * 1.2)) / 2; else bgY = textY - (lines.length * (fs * 1.2)) / 2;
+                        bg.setAttribute('x', bgX); bg.setAttribute('y', bgY); bg.setAttribute('width', tw); bg.setAttribute('height', th);
                         g.appendChild(bg);
                     }
-
-                    const text = createMultilineText(node.label, textX, textY, isSwimlane, node.fontSize, node.textColor, isText, !!node.textBgColor);
-                    text.setAttribute('class', 'node-label');
-                    text.setAttribute('text-anchor', anchor);
+                    const text = createMultilineText(node.label, textX, textY, isSwimlane, node.fontSize, node.textColor, isText);
+                    text.setAttribute('class', 'node-label'); text.setAttribute('text-anchor', anchor);
                     if (isSwimlane) text.style.fontWeight = 'bold';
                     g.appendChild(text);
                 }
 
-                // Ports
                 if (!isSwimlane && !isText) {
-                    const portsCoords = [
-                        { x: node.w / 2, y: 0, dir: 'top' },
-                        { x: node.w, y: node.h / 2, dir: 'right' },
-                        { x: node.w / 2, y: node.h, dir: 'bottom' },
-                        { x: 0, y: node.h / 2, dir: 'left' }
-                    ];
+                    const portsCoords = [{ x: node.w / 2, y: 0, dir: 'top' }, { x: node.w, y: node.h / 2, dir: 'right' }, { x: node.w / 2, y: node.h, dir: 'bottom' }, { x: 0, y: node.h / 2, dir: 'left' }];
                     portsCoords.forEach(p => {
                         const port = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        port.setAttribute('class', 'port');
-                        port.setAttribute('cx', p.x); port.setAttribute('cy', p.y); port.setAttribute('r', 4);
-
+                        port.setAttribute('class', 'port'); port.setAttribute('cx', p.x); port.setAttribute('cy', p.y); port.setAttribute('r', 4);
                         port.addEventListener('mousedown', (e) => { e.stopPropagation(); startConnectionDrag(e, node, p); });
                         port.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); showQuickAddMenu(e, node, p); });
-
-                        port.dataset.nodeId = node.id;
-                        port.dataset.dir = p.dir;
+                        port.dataset.nodeId = node.id; port.dataset.dir = p.dir;
                         g.appendChild(port);
                     });
                 }
-
                 if (isSelected && state.selection.length === 1 && !isText) {
                     const handle = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-                    handle.setAttribute('class', 'resize-handle');
-                    handle.setAttribute('x', node.w - 5); handle.setAttribute('y', node.h - 5);
+                    handle.setAttribute('class', 'resize-handle'); handle.setAttribute('x', node.w - 5); handle.setAttribute('y', node.h - 5);
                     handle.addEventListener('mousedown', (e) => { e.stopPropagation(); startResizeDrag(e, node); });
                     g.appendChild(handle);
                 }
-
                 g.addEventListener('mousedown', (e) => {
                     if (e.target.classList.contains('port') || e.target.classList.contains('resize-handle')) return;
-                    handleSelection(e, node.id);
-                    startNodeDrag(e);
-                    e.stopPropagation();
+                    handleSelection(e, node.id); startNodeDrag(e); e.stopPropagation();
                 });
                 g.addEventListener('dblclick', (e) => {
                     e.stopPropagation();
@@ -1134,190 +1391,48 @@
                 targetLayer.appendChild(g);
             });
 
-            // Quick Add Handles (For single selection of standard nodes)
             if (state.selection.length === 1) {
                 const node = state.nodes.find(n => n.id === state.selection[0]);
                 if (node && node.type !== 'swimlane' && node.type !== 'text') {
                     const padding = 20;
-                    const handles = [
-                        { dir: 'top', x: node.x + node.w / 2, y: node.y - padding },
-                        { dir: 'bottom', x: node.x + node.w / 2, y: node.y + node.h + padding },
-                        { dir: 'left', x: node.x - padding, y: node.y + node.h / 2 },
-                        { dir: 'right', x: node.x + node.w + padding, y: node.y + node.h / 2 }
-                    ];
-
+                    const handles = [{ dir: 'top', x: node.x + node.w / 2, y: node.y - padding }, { dir: 'bottom', x: node.x + node.w / 2, y: node.y + node.h + padding }, { dir: 'left', x: node.x - padding, y: node.y + node.h / 2 }, { dir: 'right', x: node.x + node.w + padding, y: node.y + node.h / 2 }];
                     handles.forEach(h => {
                         const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-                        g.setAttribute('class', 'quick-add-group');
-                        g.style.cursor = 'pointer';
-
+                        g.setAttribute('class', 'quick-add-group'); g.style.cursor = 'pointer';
                         const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                        circle.setAttribute('class', 'quick-add-handle');
-                        circle.setAttribute('cx', h.x); circle.setAttribute('cy', h.y); circle.setAttribute('r', 8);
-
+                        circle.setAttribute('class', 'quick-add-handle'); circle.setAttribute('cx', h.x); circle.setAttribute('cy', h.y); circle.setAttribute('r', 8);
                         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                        path.setAttribute('class', 'quick-add-symbol');
-                        path.setAttribute('d', `M ${h.x - 4} ${h.y} L ${h.x + 4} ${h.y} M ${h.x} ${h.y - 4} L ${h.x} ${h.y + 4}`);
-
-                        g.appendChild(circle);
-                        g.appendChild(path);
-
-                        g.addEventListener('mousedown', (e) => {
-                            e.stopPropagation();
-                            showQuickAddMenu(e, node, { dir: h.dir }, true);
-                        });
-
+                        path.setAttribute('class', 'quick-add-symbol'); path.setAttribute('d', `M ${h.x - 4} ${h.y} L ${h.x + 4} ${h.y} M ${h.x} ${h.y - 4} L ${h.x} ${h.y + 4}`);
+                        g.appendChild(circle); g.appendChild(path);
+                        g.addEventListener('mousedown', (e) => { e.stopPropagation(); showQuickAddMenu(e, node, { dir: h.dir }, true); });
                         layerUI.appendChild(g);
                     });
                 }
             }
+            if (state.activeTab === 'layer') updateLayerPanel();
         }
 
-        // --- TEXT UTILS ---
-        function createMultilineText(text, x, y, isSwimlane, size, color, isTextNode, hasBg) {
-            const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            const lines = text.split('\n');
-            const fontSize = size || 14;
-            const lineHeight = fontSize * 1.2;
-
-            t.style.fontSize = fontSize + 'px';
-            if (color) t.style.fill = color;
-
-            const totalHeight = (lines.length - 1) * lineHeight;
-            let startY = y;
-            if (!isSwimlane && !isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3);
-            if (isTextNode) startY = y - totalHeight / 2 + (fontSize * 0.3);
-
-            lines.forEach((line, i) => {
-                const tspan = document.createElementNS('http://www.w3.org/2000/svg', 'tspan');
-                tspan.textContent = line;
-                tspan.setAttribute('x', x);
-                tspan.setAttribute('dy', i === 0 ? 0 : lineHeight);
-                if (i === 0) tspan.setAttribute('y', startY);
-                t.appendChild(tspan);
-            });
-            return t;
-        }
-
-        // --- GEOMETRY UTILS ---
-        function getPortPos(node, dir) {
-            if (!dir) return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
-            if (dir === 'top') return { x: node.x + node.w / 2, y: node.y };
-            if (dir === 'right') return { x: node.x + node.w, y: node.y + node.h / 2 };
-            if (dir === 'bottom') return { x: node.x + node.w / 2, y: node.y + node.h };
-            if (dir === 'left') return { x: node.x, y: node.y + node.h / 2 };
-            return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
-        }
-
-        function getManhattanPath(source, sourceDir, target, targetDir) {
-            const s = getPortPos(source, sourceDir);
-            const t = getPortPos(target, targetDir);
-            const midX = (s.x + t.x) / 2;
-            const midY = (s.y + t.y) / 2;
-            let d = `M ${s.x} ${s.y}`;
-            if ((sourceDir === 'left' || sourceDir === 'right') && (targetDir === 'left' || targetDir === 'right')) {
-                d += ` L ${midX} ${s.y} L ${midX} ${t.y} L ${t.x} ${t.y}`;
-            } else if ((sourceDir === 'top' || sourceDir === 'bottom') && (targetDir === 'top' || targetDir === 'bottom')) {
-                d += ` L ${s.x} ${midY} L ${t.x} ${midY} L ${t.x} ${t.y}`;
-            } else {
-                if (sourceDir === 'left' || sourceDir === 'right') d += ` L ${t.x} ${s.y} L ${t.x} ${t.y}`;
-                else d += ` L ${s.x} ${t.y} L ${t.x} ${t.y}`;
-            }
-            return d;
-        }
-
-        function parsePathPoints(d) {
-            const parts = d.split(' ');
-            const points = [];
-            for (let i = 0; i < parts.length; i += 3) {
-                if (parts[i] === 'M' || parts[i] === 'L') points.push({ x: parseFloat(parts[i + 1]), y: parseFloat(parts[i + 2]) });
-            }
-            return points;
-        }
-
-        function getEdgeLabelPosition(d) {
-            const points = parsePathPoints(d);
-            if (points.length < 2) return { x: 0, y: 0, orientation: 'horizontal' };
-            let p1, p2;
-            if (points.length === 2) { p1 = points[0]; p2 = points[1]; }
-            else if (points.length === 4) { p1 = points[1]; p2 = points[2]; }
-            else { p1 = points[0]; p2 = points[points.length - 1]; }
-
-            const mx = (p1.x + p2.x) / 2;
-            const my = (p1.y + p2.y) / 2;
-            const orientation = Math.abs(p1.x - p2.x) > Math.abs(p1.y - p2.y) ? 'horizontal' : 'vertical';
-            return { x: mx, y: my, orientation };
-        }
-
-        // --- SELECTION ---
         function handleSelection(e, id) {
             if (e.shiftKey || e.ctrlKey) {
-                if (state.selection.includes(id)) {
-                    state.selection = state.selection.filter(sid => sid !== id);
-                } else {
-                    state.selection.push(id);
-                }
+                if (state.selection.includes(id)) state.selection = state.selection.filter(sid => sid !== id);
+                else state.selection.push(id);
             } else {
-                if (state.selection.length > 1 && state.selection.includes(id)) {
-                } else {
-                    state.selection = [id];
-                }
+                if (state.selection.length > 1 && state.selection.includes(id)) { } else { state.selection = [id]; }
             }
-            render();
-            updatePropsPanel();
+            render(); updatePropsPanel();
         }
 
-        // --- QUICK ADD ---
         function showQuickAddMenu(e, node, p, fromHandle = false) {
             state.quickAdd = { visible: true, sourceNodeId: node.id, portDir: p.dir, x: e.clientX, y: e.clientY };
-            quickAddMenu.style.left = e.clientX + 'px';
-            quickAddMenu.style.top = e.clientY + 'px';
-            quickAddMenu.style.display = 'grid';
+            quickAddMenu.style.left = e.clientX + 'px'; quickAddMenu.style.top = e.clientY + 'px'; quickAddMenu.style.display = 'grid';
         }
         function hideQuickAddMenu() { quickAddMenu.style.display = 'none'; state.quickAdd.visible = false; }
 
-        document.querySelectorAll('.quick-add-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (!state.quickAdd.visible) return;
-                const type = item.dataset.type;
-                const sourceNode = state.nodes.find(n => n.id === state.quickAdd.sourceNodeId);
-                if (!sourceNode) return;
-
-                let w = 120, h = 60, lbl = '処理';
-                if (type === 'circle') { w = 60; h = 60; lbl = '終了'; }
-                if (type === 'diamond') { w = 80; h = 80; lbl = '?'; }
-                if (type === 'db') { w = 60; h = 60; lbl = 'DB'; }
-
-                const offset = 80;
-                let nx = sourceNode.x, ny = sourceNode.y;
-                const dir = state.quickAdd.portDir;
-
-                if (dir === 'top') { nx += (sourceNode.w - w) / 2; ny -= (h + offset); }
-                if (dir === 'bottom') { nx += (sourceNode.w - w) / 2; ny += (sourceNode.h + offset); }
-                if (dir === 'left') { nx -= (w + offset); ny += (sourceNode.h - h) / 2; }
-                if (dir === 'right') { nx += (sourceNode.w + offset); ny += (sourceNode.h - h) / 2; }
-
-                const newNode = {
-                    id: uuid(), type: type, x: snap(nx), y: snap(ny), w: w, h: h, label: lbl, bgColor: '#ffffff', strokeWidth: 2
-                };
-
-                let targetDir = 'top';
-                if (dir === 'top') targetDir = 'bottom';
-                if (dir === 'bottom') targetDir = 'top';
-                if (dir === 'left') targetDir = 'right';
-                if (dir === 'right') targetDir = 'left';
-
-                state.nodes.push(newNode);
-                state.edges.push({ id: uuid(), source: sourceNode.id, sourcePort: dir, target: newNode.id, targetPort: targetDir, label: '' });
-                state.selection = [newNode.id]; // Select new node
-                saveState(); render(); hideQuickAddMenu();
-            });
-        });
-
-        // --- INTERACTION ---
         function startNodeDrag(e) {
             state.isDragging = true; state.dragTarget = 'node';
-            state.dragStart = { rawX: e.clientX, rawY: e.clientY };
+            const rawX = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+            const rawY = (e.touches && e.touches.length) ? e.touches[0].clientY : e.clientY;
+            state.dragStart = { rawX, rawY };
             state.dragItemOffset = {};
             state.selection.forEach(id => {
                 const n = state.nodes.find(node => node.id === id);
@@ -1326,7 +1441,9 @@
         }
         function startResizeDrag(e, node) {
             state.isDragging = true; state.dragTarget = 'resize';
-            state.dragStart = { rawX: e.clientX, rawY: e.clientY };
+            const rawX = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+            const rawY = (e.touches && e.touches.length) ? e.touches[0].clientY : e.clientY;
+            state.dragStart = { rawX, rawY };
             state.dragItemOffset = { w: node.w, h: node.h, id: node.id };
         }
         function startConnectionDrag(e, sourceNode, portConfig) {
@@ -1346,17 +1463,120 @@
             state.rubberbandRect.setAttribute('class', 'rubberband');
             state.rubberbandRect.setAttribute('x', pos.x); state.rubberbandRect.setAttribute('y', pos.y);
             layerUI.appendChild(state.rubberbandRect);
-
-            if (!e.shiftKey && !e.ctrlKey) state.selection = [];
-            render();
+            if (!e.shiftKey && !e.ctrlKey) state.selection = []; render();
         }
         function startPan(e) {
             state.isDragging = true; state.dragTarget = 'pan';
-            state.dragStart = { x: e.clientX, y: e.clientY };
+            const rawX = (e.touches && e.touches.length) ? e.touches[0].clientX : e.clientX;
+            const rawY = (e.touches && e.touches.length) ? e.touches[0].clientY : e.clientY;
+            state.dragStart = { x: rawX, y: rawY };
             state.dragItemOffset = { ...state.pan };
             wrapperEl.style.cursor = 'grabbing';
         }
 
+        function saveState() {
+            if (state.historyIndex < state.history.length - 1) state.history = state.history.slice(0, state.historyIndex + 1);
+            const s = JSON.stringify({ nodes: state.nodes, edges: state.edges });
+            state.history.push(s); state.historyIndex++;
+            updateBtns();
+            try { localStorage.setItem(STORAGE_KEY, s); } catch (e) { }
+            showToast('保存しました');
+        }
+        function undo() { if (state.historyIndex > 0) { state.historyIndex--; restore(state.history[state.historyIndex]); } }
+        function redo() { if (state.historyIndex < state.history.length - 1) { state.historyIndex++; restore(state.history[state.historyIndex]); } }
+        function restore(s) { const d = JSON.parse(s); state.nodes = d.nodes; state.edges = d.edges; state.selection = []; render(); updateBtns(); }
+        function updateBtns() {
+            document.getElementById('btn-undo').disabled = state.historyIndex <= 0;
+            document.getElementById('btn-redo').disabled = state.historyIndex >= state.history.length - 1;
+        }
+        function showToast(msg) {
+            const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1';
+            setTimeout(() => t.style.opacity = '0', 2000);
+        }
+        function setZoom(v) { state.zoom = Math.max(0.2, Math.min(3, v)); document.getElementById('zoom-level').textContent = Math.round(state.zoom * 100) + '%'; render(); }
+        function updateSelectedProps(key, value, isInt = false) {
+            let changed = false;
+            state.selection.forEach(id => {
+                const n = state.nodes.find(node => node.id === id);
+                const e = state.edges.find(edge => edge.id === id);
+                const target = n || e;
+                if (target) { target[key] = isInt ? parseInt(value) : value; changed = true; }
+            });
+            if (changed) render();
+            return changed;
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Toolbar
+        document.getElementById('btn-undo').addEventListener('click', undo);
+        document.getElementById('btn-redo').addEventListener('click', redo);
+        document.getElementById('btn-home').addEventListener('click', () => { state.pan = { x: 0, y: 0 }; state.zoom = 1; setZoom(1); });
+        document.getElementById('btn-clear').addEventListener('click', () => { if (confirm('全てクリアしますか？')) { state.nodes = []; state.edges = []; saveState(); render(); } });
+        document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(state.zoom + 0.1));
+        document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(state.zoom - 0.1));
+        document.getElementById('btn-fit').addEventListener('click', () => { state.zoom = 1; state.pan = { x: 0, y: 0 }; setZoom(1); });
+
+        // Properties
+        document.getElementById('prop-label').addEventListener('input', (e) => updateSelectedProps('label', e.target.value));
+        document.getElementById('prop-label').addEventListener('change', saveState);
+        document.getElementById('prop-type').addEventListener('change', (e) => { updateSelectedProps('type', e.target.value); saveState(); });
+        document.getElementById('prop-font-size').addEventListener('input', (e) => { updateSelectedProps('fontSize', e.target.value, true); saveState(); });
+        document.getElementById('prop-text-color').addEventListener('input', (e) => { updateSelectedProps('textColor', e.target.value); saveState(); });
+        document.getElementById('prop-text-bg-color').addEventListener('input', (e) => { updateSelectedProps('textBgColor', e.target.value); saveState(); });
+        document.getElementById('btn-text-bg-none').addEventListener('click', () => { updateSelectedProps('textBgColor', 'transparent'); saveState(); });
+        document.getElementById('prop-color').addEventListener('input', (e) => { updateSelectedProps('bgColor', e.target.value); saveState(); });
+        document.getElementById('prop-stroke-width').addEventListener('input', (e) => { updateSelectedProps('strokeWidth', e.target.value, true); saveState(); });
+        document.getElementById('btn-reset-color').addEventListener('click', () => { updateSelectedProps('bgColor', '#ffffff'); document.getElementById('prop-color').value = '#ffffff'; saveState(); });
+        document.getElementById('prop-edge-marker').addEventListener('change', (e) => { updateSelectedProps('marker', e.target.value); saveState(); });
+        document.getElementById('prop-w').addEventListener('input', (e) => {
+            if (state.selection.length === 1) { const n = state.nodes.find(x => x.id === state.selection[0]); if (n) { n.w = Math.max(MIN_SIZE, snap(parseInt(e.target.value))); render(); saveState(); } }
+        });
+        document.getElementById('prop-h').addEventListener('input', (e) => {
+            if (state.selection.length === 1) { const n = state.nodes.find(x => x.id === state.selection[0]); if (n) { n.h = Math.max(MIN_SIZE, snap(parseInt(e.target.value))); render(); saveState(); } }
+        });
+
+        // Global
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.panel-content').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                const tabId = `tab-${btn.dataset.tab}`;
+                document.getElementById(tabId).classList.add('active');
+                state.activeTab = btn.dataset.tab;
+                if (state.activeTab === 'layer') updateLayerPanel();
+            });
+        });
+
+        document.querySelectorAll('.quick-add-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (!state.quickAdd.visible) return;
+                const type = item.dataset.type;
+                const sourceNode = state.nodes.find(n => n.id === state.quickAdd.sourceNodeId);
+                if (!sourceNode) return;
+                let w = 120, h = 60, lbl = '処理';
+                if (type === 'circle') { w = 60; h = 60; lbl = '終了'; }
+                if (type === 'diamond') { w = 80; h = 80; lbl = '?'; }
+                if (type === 'db') { w = 60; h = 60; lbl = 'DB'; }
+                const offset = 80;
+                let nx = sourceNode.x, ny = sourceNode.y;
+                const dir = state.quickAdd.portDir;
+                if (dir === 'top') { nx += (sourceNode.w - w) / 2; ny -= (h + offset); }
+                if (dir === 'bottom') { nx += (sourceNode.w - w) / 2; ny += (sourceNode.h + offset); }
+                if (dir === 'left') { nx -= (w + offset); ny += (sourceNode.h - h) / 2; }
+                if (dir === 'right') { nx += (sourceNode.w + offset); ny += (sourceNode.h - h) / 2; }
+                const newNode = { id: uuid(), type: type, x: snap(nx), y: snap(ny), w: w, h: h, label: lbl, bgColor: '#ffffff', strokeWidth: 2 };
+                let targetDir = 'top';
+                if (dir === 'top') targetDir = 'bottom'; if (dir === 'bottom') targetDir = 'top'; if (dir === 'left') targetDir = 'right'; if (dir === 'right') targetDir = 'left';
+                state.nodes.push(newNode);
+                state.edges.push({ id: uuid(), source: sourceNode.id, sourcePort: dir, target: newNode.id, targetPort: targetDir, label: '' });
+                state.selection = [newNode.id];
+                saveState(); render(); hideQuickAddMenu();
+            });
+        });
+
+        // MOUSE EVENTS
         window.addEventListener('mousemove', (e) => {
             if (!state.isDragging) return;
             const CTM = svgEl.getScreenCTM();
@@ -1366,7 +1586,6 @@
             if (state.dragTarget === 'node') {
                 const deltaX = (e.clientX - state.dragStart.rawX) / state.zoom;
                 const deltaY = (e.clientY - state.dragStart.rawY) / state.zoom;
-
                 state.selection.forEach(id => {
                     const node = state.nodes.find(n => n.id === id);
                     if (node && state.dragItemOffset[id]) {
@@ -1389,102 +1608,130 @@
             } else if (state.dragTarget === 'pan') {
                 const dx = e.clientX - state.dragStart.x;
                 const dy = e.clientY - state.dragStart.y;
-                state.pan.x = state.dragItemOffset.x + dx;
-                state.pan.y = state.dragItemOffset.y + dy;
+                state.pan.x = state.dragItemOffset.x + dx; state.pan.y = state.dragItemOffset.y + dy;
                 requestAnimationFrame(render);
             } else if (state.dragTarget === 'rubberband') {
                 const x = Math.min(state.dragStart.x, mouseX);
                 const y = Math.min(state.dragStart.y, mouseY);
                 const w = Math.abs(mouseX - state.dragStart.x);
                 const h = Math.abs(mouseY - state.dragStart.y);
-                state.rubberbandRect.setAttribute('x', x);
-                state.rubberbandRect.setAttribute('y', y);
-                state.rubberbandRect.setAttribute('width', w);
-                state.rubberbandRect.setAttribute('height', h);
+                state.rubberbandRect.setAttribute('x', x); state.rubberbandRect.setAttribute('y', y);
+                state.rubberbandRect.setAttribute('width', w); state.rubberbandRect.setAttribute('height', h);
             }
         });
 
         svgEl.addEventListener('mousedown', (e) => {
             if (state.quickAdd.visible) hideQuickAddMenu();
             if (exportMenu.style.display === 'flex') exportMenu.style.display = 'none';
-
             if (e.button === 0) {
-                if (e.code === 'Space' || e.button === 1) {
-                    startPan(e);
-                } else if (e.target.id === 'main-svg' || e.target.id === 'bg-rect') {
-                    startRubberband(e);
-                }
+                if (e.code === 'Space' || e.button === 1) startPan(e);
+                else if (e.target.id === 'main-svg' || e.target.id === 'bg-rect') startRubberband(e);
             }
         });
 
-        // SCROLL
+        // SCROLL / ZOOM
         wrapperEl.addEventListener('wheel', (e) => {
             e.preventDefault();
             if (e.ctrlKey) {
                 const delta = e.deltaY > 0 ? -0.05 : 0.05;
                 setZoom(state.zoom + delta);
             } else {
-                let dx = -e.deltaX;
-                let dy = -e.deltaY;
+                let dx = -e.deltaX; let dy = -e.deltaY;
                 if (dx === 0 && e.shiftKey) { dx = -e.deltaY; dy = 0; }
-                state.pan.x += dx; state.pan.y += dy;
-                render();
+                state.pan.x += dx; state.pan.y += dy; render();
             }
         }, { passive: false });
+
+        // TOUCH EVENTS (Zoom/Pan)
+        let touchStartDist = 0;
+        let touchStartZoom = 1;
+        let touchStartPan = { x: 0, y: 0 };
+
+        wrapperEl.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                // Let D&D logic handle 1 finger tap on items if mapped, but if on bg...
+                // Currently using Mouse events mapped. But if dragging bg (pan):
+                if (e.target.id === 'main-svg' || e.target.id === 'bg-rect') {
+                    startPan(e.touches[0]);
+                }
+            } else if (e.touches.length === 2) {
+                state.isDragging = true;
+                state.dragTarget = 'pinch';
+                e.preventDefault();
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                touchStartDist = Math.sqrt(dx * dx + dy * dy);
+                touchStartZoom = state.zoom;
+            }
+        }, { passive: false });
+
+        wrapperEl.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 1 && state.dragTarget === 'pan') {
+                e.preventDefault(); // Stop scroll
+                const touch = e.touches[0];
+                const dx = touch.clientX - state.dragStart.x;
+                const dy = touch.clientY - state.dragStart.y;
+                state.pan.x = state.dragItemOffset.x + dx;
+                state.pan.y = state.dragItemOffset.y + dy;
+                render();
+            } else if (e.touches.length === 2 && state.dragTarget === 'pinch') {
+                e.preventDefault();
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (touchStartDist > 0) {
+                    const scale = dist / touchStartDist;
+                    setZoom(touchStartZoom * scale);
+                }
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', (e) => {
+            if (state.dragTarget === 'pinch' || state.dragTarget === 'pan') {
+                state.isDragging = false;
+                state.dragTarget = null;
+                wrapperEl.style.cursor = 'default';
+            }
+        });
 
         // KEYBOARD
         window.addEventListener('keydown', (e) => {
             const activeTag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
             const isInput = (activeTag === 'INPUT' || activeTag === 'TEXTAREA');
-
             if (e.code === 'Space' && !isInput) wrapperEl.style.cursor = 'grab';
-
+            if ((e.ctrlKey || e.metaKey) && e.key === 'a' && !isInput) {
+                e.preventDefault();
+                state.selection = [...state.nodes.map(n => n.id), ...state.edges.map(e => e.id)];
+                render(); updatePropsPanel();
+            }
             if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && state.selection.length > 0) {
                 if (confirm('選択項目を削除しますか？')) {
                     state.nodes = state.nodes.filter(n => !state.selection.includes(n.id));
                     state.edges = state.edges.filter(edge => !state.selection.includes(edge.id) && !state.selection.includes(edge.source) && !state.selection.includes(edge.target));
-                    state.selection = [];
-                    saveState(); render(); updatePropsPanel();
+                    state.selection = []; saveState(); render(); updatePropsPanel();
                 }
             }
-
             if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !isInput) {
                 if (state.selection.length > 0) {
-                    const nodesToCopy = state.nodes.filter(n => state.selection.includes(n.id));
-                    const edgesToCopy = state.edges.filter(e => state.selection.includes(e.source) && state.selection.includes(e.target));
-                    state.clipboard = JSON.parse(JSON.stringify({ nodes: nodesToCopy, edges: edgesToCopy }));
+                    const n = state.nodes.filter(n => state.selection.includes(n.id));
+                    const e = state.edges.filter(e => state.selection.includes(e.source) && state.selection.includes(e.target));
+                    state.clipboard = JSON.parse(JSON.stringify({ nodes: n, edges: e }));
                     showToast('コピーしました');
                 }
             }
-
             if ((e.ctrlKey || e.metaKey) && e.key === 'v' && !isInput) {
                 if (state.clipboard) {
-                    const idMap = {};
-                    const pasteOffset = 20;
-                    const newNodes = [];
-                    const newEdges = [];
-                    const newSelection = [];
-
+                    const idMap = {}; const off = 20; const nn = []; const ne = []; const ns = [];
                     state.clipboard.nodes.forEach(n => {
-                        const newId = uuid();
-                        idMap[n.id] = newId;
-                        const copyNode = { ...n, id: newId, x: n.x + pasteOffset, y: n.y + pasteOffset };
-                        newNodes.push(copyNode);
-                        newSelection.push(newId);
+                        const nid = uuid(); idMap[n.id] = nid;
+                        nn.push({ ...n, id: nid, x: n.x + off, y: n.y + off }); ns.push(nid);
                     });
-
                     state.clipboard.edges.forEach(e => {
-                        const newEdge = { ...e, id: uuid(), source: idMap[e.source], target: idMap[e.target] };
-                        if (newEdge.source && newEdge.target) newEdges.push(newEdge);
+                        if (idMap[e.source] && idMap[e.target]) ne.push({ ...e, id: uuid(), source: idMap[e.source], target: idMap[e.target] });
                     });
-
-                    state.nodes.push(...newNodes);
-                    state.edges.push(...newEdges);
-                    state.selection = newSelection;
-                    saveState(); render(); showToast('貼り付けました');
+                    state.nodes.push(...nn); state.edges.push(...ne); state.selection = ns; saveState(); render(); showToast('貼り付けました');
                 }
             }
-
             if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
             if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
         });
@@ -1492,39 +1739,25 @@
 
         window.addEventListener('mouseup', (e) => {
             if (!state.isDragging) return;
-
             if (state.dragTarget === 'port') {
                 state.tempLine.remove();
                 const el = document.elementFromPoint(e.clientX, e.clientY);
                 if (el && el.classList.contains('port')) {
-                    const tId = el.dataset.nodeId;
-                    const tDir = el.dataset.dir;
+                    const tId = el.dataset.nodeId; const tDir = el.dataset.dir;
                     if (tId && tId !== state.dragStart.nodeId) {
-                        state.edges.push({
-                            id: uuid(), source: state.dragStart.nodeId, sourcePort: state.dragStart.portDir,
-                            target: tId, targetPort: tDir, label: ''
-                        });
+                        state.edges.push({ id: uuid(), source: state.dragStart.nodeId, sourcePort: state.dragStart.portDir, target: tId, targetPort: tDir, label: '', marker: 'end' });
                         saveState();
                     }
                 }
             } else if (state.dragTarget === 'rubberband') {
                 const r = state.rubberbandRect;
-                const rx = parseFloat(r.getAttribute('x'));
-                const ry = parseFloat(r.getAttribute('y'));
-                const rw = parseFloat(r.getAttribute('width'));
-                const rh = parseFloat(r.getAttribute('height'));
-
+                const rx = parseFloat(r.getAttribute('x')); const ry = parseFloat(r.getAttribute('y'));
+                const rw = parseFloat(r.getAttribute('width')); const rh = parseFloat(r.getAttribute('height'));
                 state.nodes.forEach(n => {
-                    if (n.x < rx + rw && n.x + n.w > rx && n.y < ry + rh && n.y + n.h > ry) {
-                        if (!state.selection.includes(n.id)) state.selection.push(n.id);
-                    }
+                    if (n.x < rx + rw && n.x + n.w > rx && n.y < ry + rh && n.y + n.h > ry) { if (!state.selection.includes(n.id)) state.selection.push(n.id); }
                 });
-                state.rubberbandRect.remove();
-                updatePropsPanel();
-            } else if (['node', 'resize'].includes(state.dragTarget)) {
-                saveState();
-            }
-
+                state.rubberbandRect.remove(); updatePropsPanel();
+            } else if (['node', 'resize'].includes(state.dragTarget)) { saveState(); }
             if (state.dragTarget === 'pan') wrapperEl.style.cursor = 'default';
             state.isDragging = false; state.dragTarget = null; render();
         });
@@ -1534,9 +1767,7 @@
         dndItems.forEach(item => item.addEventListener('dragstart', (e) => e.dataTransfer.setData('type', item.dataset.type)));
         wrapperEl.addEventListener('dragover', (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
         wrapperEl.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const type = e.dataTransfer.getData('type');
-            if (!type) return;
+            e.preventDefault(); const type = e.dataTransfer.getData('type'); if (!type) return;
             const pos = getMousePos(e);
             let w = 120, h = 60, lbl = '処理', bg = '#ffffff';
             if (type === 'circle') { w = 60; h = 60; lbl = '開始'; }
@@ -1544,139 +1775,11 @@
             else if (type === 'db') { w = 60; h = 60; lbl = 'DB'; }
             else if (type === 'swimlane') { w = 300; h = 400; lbl = '担当領域'; bg = '#f8fafc'; }
             else if (type === 'text') { w = 120; h = 40; lbl = 'テキスト'; bg = 'transparent'; }
-
-            const newNode = {
-                id: uuid(), type: type, x: snap(pos.x - w / 2), y: snap(pos.y - h / 2), w: w, h: h, label: lbl, bgColor: bg,
-                strokeWidth: 2 // Default border
-            };
-            state.nodes.push(newNode); saveState();
-            state.selection = [newNode.id];
-            render();
+            const newNode = { id: uuid(), type: type, x: snap(pos.x - w / 2), y: snap(pos.y - h / 2), w: w, h: h, label: lbl, bgColor: bg, strokeWidth: 2 };
+            state.nodes.push(newNode); saveState(); state.selection = [newNode.id]; render();
         });
 
-        // HELPERS
-        function getMousePos(evt) {
-            const CTM = svgEl.getScreenCTM();
-            return {
-                x: (evt.clientX - CTM.e - state.pan.x) / state.zoom,
-                y: (evt.clientY - CTM.f - state.pan.y) / state.zoom
-            };
-        }
-
-        // PROPERTIES
-        function updatePropsPanel() {
-            const empty = document.getElementById('props-empty');
-            const multi = document.getElementById('props-multi');
-            const content = document.getElementById('props-content');
-            const dimGroup = document.getElementById('group-dimensions');
-            const styleGroup = document.getElementById('group-style');
-
-            if (state.selection.length === 0) {
-                empty.style.display = 'block'; multi.style.display = 'none'; content.style.display = 'none';
-            } else if (state.selection.length > 1) {
-                empty.style.display = 'none'; multi.style.display = 'block'; content.style.display = 'none';
-            } else {
-                empty.style.display = 'none'; multi.style.display = 'none'; content.style.display = 'block';
-
-                const id = state.selection[0];
-                const node = state.nodes.find(n => n.id === id);
-                const edge = state.edges.find(e => e.id === id);
-                const el = node || edge;
-
-                if (el) {
-                    document.getElementById('prop-id').value = el.id;
-                    document.getElementById('prop-label').value = el.label || '';
-                    document.getElementById('prop-font-size').value = el.fontSize || 14;
-                    document.getElementById('prop-text-color').value = el.textColor || '#000000';
-                    document.getElementById('prop-text-bg-color').value = (el.textBgColor && el.textBgColor !== 'transparent') ? el.textBgColor : '#ffffff';
-
-                    if (node) {
-                        dimGroup.style.display = 'block';
-                        styleGroup.style.display = 'block';
-                        document.getElementById('prop-type').value = node.type;
-                        document.getElementById('prop-w').value = node.w;
-                        document.getElementById('prop-h').value = node.h;
-                        document.getElementById('prop-color').value = node.bgColor || '#ffffff';
-                        document.getElementById('prop-stroke-width').value = node.strokeWidth !== undefined ? node.strokeWidth : 2;
-                    } else {
-                        dimGroup.style.display = 'none';
-                        styleGroup.style.display = 'none';
-                    }
-                }
-            }
-        }
-
-        // Prop Event Listeners
-        function updateSelectedProps(key, value, isInt = false) {
-            let changed = false;
-            state.selection.forEach(id => {
-                const n = state.nodes.find(node => node.id === id);
-                const e = state.edges.find(edge => edge.id === id);
-                const target = n || e;
-                if (target) {
-                    target[key] = isInt ? parseInt(value) : value;
-                    changed = true;
-                }
-            });
-            if (changed) { render(); }
-            return changed;
-        }
-
-        document.getElementById('prop-label').addEventListener('input', (e) => updateSelectedProps('label', e.target.value));
-        document.getElementById('prop-label').addEventListener('change', saveState);
-        document.getElementById('prop-type').addEventListener('change', (e) => { updateSelectedProps('type', e.target.value); saveState(); });
-        document.getElementById('prop-font-size').addEventListener('input', (e) => { updateSelectedProps('fontSize', e.target.value, true); saveState(); });
-        document.getElementById('prop-text-color').addEventListener('input', (e) => { updateSelectedProps('textColor', e.target.value); saveState(); });
-        document.getElementById('prop-text-bg-color').addEventListener('input', (e) => { updateSelectedProps('textBgColor', e.target.value); saveState(); });
-        document.getElementById('btn-text-bg-none').addEventListener('click', () => { updateSelectedProps('textBgColor', 'transparent'); saveState(); });
-
-        document.getElementById('prop-color').addEventListener('input', (e) => { updateSelectedProps('bgColor', e.target.value); saveState(); });
-        document.getElementById('prop-stroke-width').addEventListener('input', (e) => { updateSelectedProps('strokeWidth', e.target.value, true); saveState(); });
-        document.getElementById('btn-reset-color').addEventListener('click', () => { updateSelectedProps('bgColor', '#ffffff'); document.getElementById('prop-color').value = '#ffffff'; saveState(); });
-
-        document.getElementById('prop-w').addEventListener('input', (e) => {
-            if (state.selection.length === 1) {
-                const n = state.nodes.find(x => x.id === state.selection[0]);
-                if (n) { n.w = Math.max(MIN_SIZE, snap(parseInt(e.target.value))); render(); saveState(); }
-            }
-        });
-        document.getElementById('prop-h').addEventListener('input', (e) => {
-            if (state.selection.length === 1) {
-                const n = state.nodes.find(x => x.id === state.selection[0]);
-                if (n) { n.h = Math.max(MIN_SIZE, snap(parseInt(e.target.value))); render(); saveState(); }
-            }
-        });
-
-        // STATE & UTILS
-        function saveState() {
-            if (state.historyIndex < state.history.length - 1) state.history = state.history.slice(0, state.historyIndex + 1);
-            const s = JSON.stringify({ nodes: state.nodes, edges: state.edges });
-            state.history.push(s); state.historyIndex++;
-            updateBtns(); localStorage.setItem(STORAGE_KEY, s); showToast('保存しました');
-        }
-        function undo() { if (state.historyIndex > 0) { state.historyIndex--; restore(state.history[state.historyIndex]); } }
-        function redo() { if (state.historyIndex < state.history.length - 1) { state.historyIndex++; restore(state.history[state.historyIndex]); } }
-        function restore(s) { const d = JSON.parse(s); state.nodes = d.nodes; state.edges = d.edges; state.selection = []; render(); updateBtns(); }
-        function updateBtns() {
-            document.getElementById('btn-undo').disabled = state.historyIndex <= 0;
-            document.getElementById('btn-redo').disabled = state.historyIndex >= state.history.length - 1;
-        }
-        function showToast(msg) {
-            const t = document.getElementById('toast'); t.textContent = msg; t.style.opacity = '1';
-            setTimeout(() => t.style.opacity = '0', 2000);
-        }
-        function setZoom(v) { state.zoom = Math.max(0.2, Math.min(3, v)); document.getElementById('zoom-level').textContent = Math.round(state.zoom * 100) + '%'; render(); }
-
-        // TOOLBAR
-        document.getElementById('btn-undo').addEventListener('click', undo);
-        document.getElementById('btn-redo').addEventListener('click', redo);
-        document.getElementById('btn-home').addEventListener('click', () => { state.pan = { x: 0, y: 0 }; state.zoom = 1; setZoom(1); });
-        document.getElementById('btn-clear').addEventListener('click', () => { if (confirm('全てクリアしますか？')) { state.nodes = []; state.edges = []; saveState(); render(); } });
-        document.getElementById('btn-zoom-in').addEventListener('click', () => setZoom(state.zoom + 0.1));
-        document.getElementById('btn-zoom-out').addEventListener('click', () => setZoom(state.zoom - 0.1));
-        document.getElementById('btn-fit').addEventListener('click', () => { state.zoom = 1; state.pan = { x: 0, y: 0 }; setZoom(1); });
-
-        // EXPORT
+        // Export & Init
         const btnExportMenu = document.getElementById('btn-export-menu');
         btnExportMenu.addEventListener('click', (e) => { e.stopPropagation(); exportMenu.style.display = exportMenu.style.display === 'flex' ? 'none' : 'flex'; });
         window.addEventListener('click', (e) => { if (!e.target.closest('#btn-export-menu')) exportMenu.style.display = 'none'; });
@@ -1688,109 +1791,57 @@
 
         document.getElementById('export-pdf').addEventListener('click', () => {
             if (state.nodes.length === 0) return alert('キャンバスが空です');
-            const originalZoom = state.zoom;
-            const originalPan = { ...state.pan };
+            const originalZoom = state.zoom; const originalPan = { ...state.pan };
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            state.nodes.forEach(n => {
-                if (n.x < minX) minX = n.x; if (n.y < minY) minY = n.y;
-                if (n.x + n.w > maxX) maxX = n.x + n.w; if (n.y + n.h > maxY) maxY = n.y + n.h;
-            });
-            const padding = 20;
-            state.pan.x = -minX + padding;
-            state.pan.y = -minY + padding;
-            state.zoom = 1;
-            render();
-            setTimeout(() => {
-                window.print();
-                state.pan = originalPan;
-                state.zoom = originalZoom;
-                render();
-            }, 100);
+            state.nodes.forEach(n => { if (n.x < minX) minX = n.x; if (n.y < minY) minY = n.y; if (n.x + n.w > maxX) maxX = n.x + n.w; if (n.y + n.h > maxY) maxY = n.y + n.h; });
+            const padding = 20; state.pan.x = -minX + padding; state.pan.y = -minY + padding; state.zoom = 1;
+            render(); setTimeout(() => { window.print(); state.pan = originalPan; state.zoom = originalZoom; render(); }, 100);
         });
 
         function exportImage(format) {
             exportMenu.style.display = 'none';
             if (state.nodes.length === 0) return alert('キャンバスが空です');
-
             let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            state.nodes.forEach(n => {
-                if (n.x < minX) minX = n.x; if (n.y < minY) minY = n.y;
-                if (n.x + n.w > maxX) maxX = n.x + n.w; if (n.y + n.h > maxY) maxY = n.y + n.h;
-            });
-            const padding = 50;
-            const width = maxX - minX + padding * 2;
-            const height = maxY - minY + padding * 2;
-
+            state.nodes.forEach(n => { if (n.x < minX) minX = n.x; if (n.y < minY) minY = n.y; if (n.x + n.w > maxX) maxX = n.x + n.w; if (n.y + n.h > maxY) maxY = n.y + n.h; });
+            const padding = 50; const width = maxX - minX + padding * 2; const height = maxY - minY + padding * 2;
             const clone = svgEl.cloneNode(true);
             const viewport = clone.getElementById('viewport-group');
             viewport.setAttribute('transform', `translate(${padding - minX}, ${padding - minY})`);
             clone.setAttribute('width', width); clone.setAttribute('height', height);
-
             clone.querySelectorAll('.port, .resize-handle, #layer-ui').forEach(el => el.remove());
-
             const isPng = format === 'image/png';
             const bgColor = isPng ? 'transparent' : '#f0f0f0';
             clone.style.background = bgColor;
-
             const style = document.createElement('style');
-            style.textContent = `
-            .node-body { stroke: #1e293b; vector-effect: non-scaling-stroke; }
-            .connector-path { fill: none; stroke: #64748b; stroke-width: 2px; stroke-linejoin: round; stroke-linecap: round; }
-            .node-label, .edge-label-text { font-family: sans-serif; font-size: 14px; fill: #334155; }
-            .text-bg-rect { fill-opacity: 1; stroke: none; }
-        `;
+            style.textContent = `.node-body { stroke: #1e293b; vector-effect: non-scaling-stroke; } .connector-path { fill: none; stroke: #64748b; stroke-width: 2px; stroke-linejoin: round; stroke-linecap: round; } .node-label, .edge-label-text { font-family: sans-serif; font-size: 14px; fill: #334155; } .text-bg-rect { fill-opacity: 1; stroke: none; }`;
             clone.insertBefore(style, clone.firstChild);
-
             const svgData = new XMLSerializer().serializeToString(clone);
             const img = new Image();
             img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = width; canvas.height = height;
-                const ctx = canvas.getContext('2d');
-
-                if (!isPng) {
-                    ctx.fillStyle = '#f0f0f0';
-                    ctx.fillRect(0, 0, width, height);
-                    ctx.strokeStyle = '#e2e8f0';
-                    ctx.lineWidth = 1;
-                    ctx.beginPath();
-                    for (let x = 0; x <= width; x += 20) { ctx.moveTo(x, 0); ctx.lineTo(x, height); }
-                    for (let y = 0; y <= height; y += 20) { ctx.moveTo(0, y); ctx.lineTo(width, y); }
-                    ctx.stroke();
-                }
-
+                const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height; const ctx = canvas.getContext('2d');
+                if (!isPng) { ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, width, height); ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1; ctx.beginPath(); for (let x = 0; x <= width; x += 20) { ctx.moveTo(x, 0); ctx.lineTo(x, height); } for (let y = 0; y <= height; y += 20) { ctx.moveTo(0, y); ctx.lineTo(width, y); } ctx.stroke(); }
                 ctx.drawImage(img, 0, 0);
-                const a = document.createElement('a');
-                a.href = canvas.toDataURL(format);
-                a.download = `bizflow_${Date.now()}.${isPng ? 'png' : 'jpg'}`;
-                a.click();
+                const a = document.createElement('a'); a.href = canvas.toDataURL(format); a.download = `bizflow_${Date.now()}.${isPng ? 'png' : 'jpg'}`; a.click();
             };
             img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
         }
-
         document.getElementById('export-png').addEventListener('click', () => exportImage('image/png'));
         document.getElementById('export-jpeg').addEventListener('click', () => exportImage('image/jpeg'));
 
         document.getElementById('btn-import').addEventListener('click', () => document.getElementById('file-input').click());
         document.getElementById('file-input').addEventListener('change', (e) => {
             const f = e.target.files[0]; if (!f) return;
-            const r = new FileReader(); r.onload = (ev) => {
-                try {
-                    const d = JSON.parse(ev.target.result);
-                    state.nodes = d.nodes; state.edges = d.edges;
-                    state.selection = [];
-                    saveState(); render();
-                } catch (err) { alert('読み込みエラー'); }
-            };
+            const r = new FileReader(); r.onload = (ev) => { try { const d = JSON.parse(ev.target.result); state.nodes = d.nodes; state.edges = d.edges; state.selection = []; saveState(); render(); } catch (err) { alert('読み込みエラー'); } };
             r.readAsText(f);
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            const s = localStorage.getItem(STORAGE_KEY);
-            if (s) { state.history.push(s); state.historyIndex = 0; restore(s); } else saveState();
+            try {
+                const s = localStorage.getItem(STORAGE_KEY);
+                if (s) { state.history.push(s); state.historyIndex = 0; restore(s); } else saveState();
+            } catch (e) { console.error('Storage Error', e); saveState(); }
             render();
         });
-
     </script>
 </body>
 
