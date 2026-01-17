@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BizFlow Designer (v7.0 Extended)</title>
+    <title>BizFlow Designer (v7.2 Improved)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -191,12 +191,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #334155;
         }
 
         .svg-icon-container svg {
             width: 100%;
             height: 100%;
             overflow: visible;
+            fill: currentColor;
         }
 
         .shape-swimlane {
@@ -802,7 +804,7 @@
                     </svg>
                     BizFlow
                 </div>
-                <div class="app-subtitle">アクティビティ図作成ツール (v7.0)</div>
+                <div class="app-subtitle">アクティビティ図作成ツール (v7.2)</div>
             </div>
 
             <div class="stencil-content">
@@ -834,49 +836,40 @@
                     <span class="item-label">テキスト</span>
                 </div>
 
-                <div class="group-title">アイコン</div>
+                <!-- アイコンを塗りつぶしデザインに変更済み (v7.1) -->
+                <div class="group-title">アイコン (改良版)</div>
                 <div class="dnd-item" draggable="true" data-type="icon-pc" title="パソコン">
                     <div class="svg-icon-container">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                            <line x1="8" y1="21" x2="16" y2="21"></line>
-                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20 17.575V4H4V17.575H20ZM22 2V19H13V21H16V23H8V21H11V19H2V2H22ZM6 6H18V15.5H6V6Z" />
+                            <rect x="6" y="6" width="12" height="9.5" fill="currentColor" />
                         </svg>
                     </div>
                     <span class="item-label">パソコン</span>
                 </div>
                 <div class="dnd-item" draggable="true" data-type="icon-doc" title="書類">
                     <div class="svg-icon-container">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM13 9V3.5L18.5 9H13Z" />
                         </svg>
                     </div>
                     <span class="item-label">書類</span>
                 </div>
                 <div class="dnd-item" draggable="true" data-type="icon-server" title="サーバー">
                     <div class="svg-icon-container">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
-                            <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
-                            <line x1="6" y1="6" x2="6.01" y2="6"></line>
-                            <line x1="6" y1="18" x2="6.01" y2="18"></line>
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2 20V4H22V20H2ZM4 6V10H20V6H4ZM4 12V18H20V12H4ZM6 7V9H8V7H6ZM6 13V15H8V13H6Z" />
                         </svg>
                     </div>
                     <span class="item-label">サーバー</span>
                 </div>
                 <div class="dnd-item" draggable="true" data-type="icon-user" title="ユーザー">
                     <div class="svg-icon-container">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#334155" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" />
                         </svg>
                     </div>
                     <span class="item-label">ユーザー</span>
@@ -908,11 +901,9 @@
                             </path>
                         </svg></button>
                     <div class="separator"></div>
-                    <!-- UPDATE: Changed title text -->
                     <button id="btn-home" class="btn-icon" title="元の位置に戻る"><svg viewBox="0 0 24 24">
                             <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                         </svg></button>
-                    <!-- UPDATE: Changed title text -->
                     <button id="btn-fit" class="btn-icon" title="大きさを100%に戻す"><svg viewBox="0 0 24 24">
                             <path
                                 d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6z">
@@ -952,14 +943,14 @@
                         <pattern id="grid-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
                             <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e2e8f0" stroke-width="1" />
                         </pattern>
-                        <!-- Markers -->
-                        <marker id="arrow-end" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"
+                        <!-- Markers (サイズ縮小: 10->7) -->
+                        <marker id="arrow-end" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto"
                             markerUnits="strokeWidth">
-                            <path d="M0,0 L0,6 L9,3 z" fill="#64748b" />
+                            <path d="M0,0 L0,7 L7,3.5 z" fill="#64748b" />
                         </marker>
-                        <marker id="arrow-start" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"
+                        <marker id="arrow-start" markerWidth="7" markerHeight="7" refX="1" refY="3.5" orient="auto"
                             markerUnits="strokeWidth">
-                            <path d="M9,0 L9,6 L0,3 z" fill="#64748b" />
+                            <path d="M7,0 L7,7 L0,3.5 z" fill="#64748b" />
                         </marker>
                     </defs>
                     <rect id="bg-rect" width="100%" height="100%" fill="none"></rect>
@@ -1089,7 +1080,9 @@
                         <label class="prop-label">スタイル</label>
                         <div style="margin-bottom: 0.5rem;">
                             <label style="font-size: 0.7rem; color: #94a3b8;">枠線太さ (px)</label>
-                            <input type="number" id="prop-stroke-width" class="prop-input" min="0" max="10" value="2">
+                            <!-- UPDATE: 0.5刻みに変更 -->
+                            <input type="number" id="prop-stroke-width" class="prop-input" min="0" max="10" step="0.5"
+                                value="2">
                         </div>
                         <div>
                             <label style="font-size: 0.7rem; color: #94a3b8;">図形背景色</label>
@@ -1139,10 +1132,10 @@
     <input type="file" id="file-input" accept=".json" style="display: none;">
 
     <script>
-        /** BizFlow Designer - Offline Logic v7.0 Extended */
+        /** BizFlow Designer - Offline Logic v7.2 Improved */
         const GRID_SIZE = 10;
         const STORAGE_KEY = 'bizflow_offline_data_v7';
-        const MIN_SIZE = 24; // アイコン用に最小サイズ緩和
+        const MIN_SIZE = 24;
 
         // Global State
         const state = {
@@ -1152,7 +1145,7 @@
             dragItemOffset: {}, tempLine: null, rubberbandRect: null,
             quickAdd: { visible: false, sourceNodeId: null, portDir: null, x: 0, y: 0 },
             activeTab: 'prop', layerDragIdx: null,
-            draggingHandle: { edgeId: null, index: -1 } // For edge routing
+            draggingHandle: { edgeId: null, index: -1 }
         };
 
         // DOM Elements
@@ -1174,7 +1167,6 @@
 
         function getMousePos(evt) {
             let cx, cy;
-            // Support touch events or Mouse events
             if (evt.touches && evt.touches.length > 0) {
                 cx = evt.touches[0].clientX; cy = evt.touches[0].clientY;
             } else if (evt.clientX !== undefined) {
@@ -1227,12 +1219,9 @@
             const points = parsePathPoints(d);
             if (points.length < 2) return { x: 0, y: 0, orientation: 'horizontal' };
             let p1, p2;
-            // Find the longest segment for label placement if possible, or just middle
             if (points.length === 2) { p1 = points[0]; p2 = points[1]; }
             else if (points.length >= 4) {
-                // Heuristic: choose middle segment
                 const mid = Math.floor(points.length / 2);
-                // Adjust if even number of segments to pick the middle one
                 if (mid > 0) { p1 = points[mid - 1]; p2 = points[mid]; } else { p1 = points[0]; p2 = points[1]; }
             } else { p1 = points[0]; p2 = points[points.length - 1]; }
 
@@ -1242,26 +1231,18 @@
             return { x: mx, y: my, orientation };
         }
 
-        // Expanded port positions logic
-        // dir format: 'top', 'top-L', 'top-R' or just 'top' (default center)
         function getPortPos(node, dirStr) {
             if (!dirStr) return { x: node.x + node.w / 2, y: node.y + node.h / 2 };
 
             const parts = dirStr.split('-');
             const mainDir = parts[0];
-            const subDir = parts[1]; // undefined, L, R
+            const subDir = parts[1];
 
             let x = node.x, y = node.y;
             let offsetRatio = 0.5;
 
             if (subDir === 'L') offsetRatio = 0.25;
             if (subDir === 'R') offsetRatio = 0.75;
-
-            // Adjust for Left/Right sides where L/R means Top/Bottom relatively
-            // For vertical sides (left/right), L means top (0.25), R means bottom (0.75) from visual perspective?
-            // Actually let's stick to normalized logic:
-            // Horizontal sides (top/bottom): L=left(0.25), R=right(0.75)
-            // Vertical sides (left/right): L=top(0.25), R=bottom(0.75)
 
             if (mainDir === 'top') {
                 x += node.w * offsetRatio;
@@ -1276,7 +1257,6 @@
                 x = node.x + node.w;
                 y += node.h * offsetRatio;
             } else {
-                // Fallback center
                 x += node.w / 2;
                 y += node.h / 2;
             }
@@ -1288,77 +1268,55 @@
             return dirStr ? dirStr.split('-')[0] : 'top';
         }
 
-        /**
-         * Enhanced Manhattan Routing with Waypoints support
-         */
         function getManhattanPath(source, sourcePortStr, target, targetPortStr, waypoints) {
             const start = getPortPos(source, sourcePortStr);
             const end = getPortPos(target, targetPortStr);
             const sDir = getDirFromPortStr(sourcePortStr);
             const tDir = getDirFromPortStr(targetPortStr);
 
-            // If no waypoints, use standard routing
             if (!waypoints || waypoints.length === 0) {
                 return calculateOrthogonalPath(start, sDir, end, tDir);
             }
 
-            // If waypoints exist, route through them: Start -> W1 -> W2 -> End
             let path = `M ${start.x} ${start.y}`;
-
-            // Route from Start to First Waypoint
-            // We treat waypoint as a target with neutral direction or best guess
-            // Simple approach: Route standard orthogonal to W1. 
-            // Since W1 is just a point, we infer direction.
             let curr = start;
             let currDir = sDir;
 
             waypoints.forEach((wp, idx) => {
-                // Determine direction to waypoint for simple L-shape
-                // Use a simple L-shape or straight line if aligned
                 const segmentPath = calculateOrthogonalPathPointToPoint(curr, currDir, wp, null);
-                // remove initial Move command from segment path
                 path += ' ' + segmentPath.replace(/^M [\d\.]+ [\d\.]+ /, '');
                 curr = wp;
-                // update current direction based on how we arrived? 
-                // For simplicity, we just continue.
-                // In a perfect system, we'd know exit direction.
-                // Let's assume neutral for mid-points.
                 currDir = null;
             });
 
-            // Route from Last Waypoint to End
             const finalSegment = calculateOrthogonalPathPointToPoint(curr, currDir, end, tDir);
             path += ' ' + finalSegment.replace(/^M [\d\.]+ [\d\.]+ /, '');
 
             return path;
         }
 
-        // Helper: Basic point-to-point Manhattan (without node collision logic)
         function calculateOrthogonalPathPointToPoint(p1, dir1, p2, dir2) {
-            // Simplified logic of the original getManhattanPath, but treating points as nodes
-            // Mock nodes for the original function
-            const n1 = { x: p1.x - 1, y: p1.y - 1, w: 2, h: 2 };
-            const n2 = { x: p2.x - 1, y: p2.y - 1, w: 2, h: 2 };
-
-            // If dir is null, infer from relative pos?
             const d1 = dir1 || (Math.abs(p1.x - p2.x) > Math.abs(p1.y - p2.y) ? (p2.x > p1.x ? 'right' : 'left') : (p2.y > p1.y ? 'bottom' : 'top'));
             const d2 = dir2 || (d1 === 'left' ? 'right' : d1 === 'right' ? 'left' : d1 === 'top' ? 'bottom' : 'top');
-
-            // Use the core logic, adapting getting pos
-            // We pass dummy objects that return p1 and p2 exactly
-            const dummySource = { ...n1, x: p1.x, y: p1.y, w: 0, h: 0 }; // Center is p1
-            const dummyTarget = { ...n2, x: p2.x, y: p2.y, w: 0, h: 0 }; // Center is p2
-
-            // Override getPortPos temporarily or rewrite logic? 
-            // Rewriting core logic cleanly:
             return generatePathString(p1, d1, p2, d2);
         }
 
-        // Extracted Core Routing Logic
+        // --- Improved Routing Logic (v7.1) ---
         function generatePathString(s, sourceDir, t, targetDir) {
-            const stub = 20;
+            let stub = 10;
+
             let sx = s.x, sy = s.y;
             let tx = t.x, ty = t.y;
+
+            // 特殊ケース：非常に近い距離での直接接続（Stub無視）
+            const dist = Math.sqrt(Math.pow(tx - sx, 2) + Math.pow(ty - sy, 2));
+            const isAlignedX = Math.abs(tx - sx) < 1;
+            const isAlignedY = Math.abs(ty - sy) < 1;
+
+            if ((isAlignedX && (sourceDir === 'top' || sourceDir === 'bottom') && (targetDir === 'top' || targetDir === 'bottom')) ||
+                (isAlignedY && (sourceDir === 'left' || sourceDir === 'right') && (targetDir === 'left' || targetDir === 'right'))) {
+                return `M ${s.x} ${s.y} L ${t.x} ${t.y}`;
+            }
 
             // Advance start
             if (sourceDir === 'top') sy -= stub;
@@ -1377,7 +1335,6 @@
             const dx = tx - sx;
             const dy = ty - sy;
 
-            // Basic Strategy
             const isVertS = (sourceDir === 'top' || sourceDir === 'bottom');
             const isVertT = (targetDir === 'top' || targetDir === 'bottom');
 
@@ -1388,8 +1345,7 @@
                     path += ` L ${sx} ${midY} L ${tx} ${midY} L ${tx} ${ty}`;
                 } else {
                     // U-shape
-                    let midX = (s.x > t.x) ? s.x + stub : t.x + stub; // Right side default
-                    if (Math.abs(sx - tx) < 20) {
+                    if (Math.abs(sx - tx) < stub * 2) {
                         const detourX = Math.max(sx, tx) + stub;
                         path += ` L ${detourX} ${sy} L ${detourX} ${ty} L ${tx} ${ty}`;
                     } else {
@@ -1406,9 +1362,11 @@
                     path += ` L ${sx} ${midYDetour} L ${tx} ${midYDetour} L ${tx} ${ty}`;
                 }
             } else {
+                // L-shape mixed
                 const cornerX = (isVertS) ? sx : tx;
                 const cornerY = (isVertS) ? ty : sy;
                 let bad = false;
+
                 if (sourceDir === 'top' && cornerY > sy) bad = true;
                 if (sourceDir === 'bottom' && cornerY < sy) bad = true;
                 if (sourceDir === 'left' && cornerX > sx) bad = true;
@@ -1426,14 +1384,12 @@
                     else path += ` L ${tx} ${sy} L ${tx} ${ty}`;
                 }
             }
+
             path += ` L ${t.x} ${t.y}`;
             return path;
         }
 
-        // Wrapper to maintain old signature if needed
         function calculateOrthogonalPath(s, sDir, t, tDir) {
-            // Recalculate positions based on raw node data inside getManhattanPath calls? 
-            // The passed arguments here are POINTS, not Nodes.
             return generatePathString(s, sDir, t, tDir);
         }
 
@@ -1523,7 +1479,6 @@
             layerSwimlanes.innerHTML = ''; layerNodes.innerHTML = ''; layerEdges.innerHTML = ''; layerLabels.innerHTML = '';
             const tempChildren = Array.from(layerUI.children);
             tempChildren.forEach(c => {
-                // Keep temp lines and rubberband, remove handles
                 if (c !== state.tempLine && c !== state.rubberbandRect) layerUI.removeChild(c);
             });
             viewportEl.setAttribute('transform', `translate(${state.pan.x}, ${state.pan.y}) scale(${state.zoom})`);
@@ -1533,7 +1488,6 @@
                 const targetNode = state.nodes.find(n => n.id === edge.target);
                 if (!sourceNode || !targetNode) return;
 
-                // 1. Draw Edge
                 const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                 group.dataset.id = edge.id; group.style.cursor = 'pointer';
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -1551,15 +1505,7 @@
                 group.addEventListener('mousedown', (e) => { handleSelection(e, edge.id); e.stopPropagation(); });
                 layerEdges.appendChild(group);
 
-                // Draw Edit Handles for Edge (Waypoints) if selected
                 if (isSelected) {
-                    // Mid-point handles for adding/moving waypoints?
-                    // Simplification: Just show handles for existing waypoints and maybe the middle of long segments?
-                    // Current Implementation: Show handles at waypoints. 
-                    // Clicking a segment to add waypoint is handled by UI Logic maybe later.
-                    // Let's add a handle in the middle of the path to allow creating the first waypoint if none exist.
-
-                    // Visualize existing waypoints
                     if (edge.waypoints) {
                         edge.waypoints.forEach((wp, idx) => {
                             const h = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -1583,13 +1529,10 @@
                         });
                     }
 
-                    // Add a "Add Waypoint" handle at the middle of the path if no waypoints, or between points?
-                    // For simplicity, let's just use the segment middle points of the calculated path to add new waypoints
                     const points = parsePathPoints(d);
                     for (let i = 0; i < points.length - 1; i++) {
                         const p1 = points[i];
                         const p2 = points[i + 1];
-                        // Only add handles on significant segments
                         if (Math.abs(p1.x - p2.x) > 20 || Math.abs(p1.y - p2.y) > 20) {
                             const midX = (p1.x + p2.x) / 2;
                             const midY = (p1.y + p2.y) / 2;
@@ -1598,20 +1541,11 @@
                             h.setAttribute('class', 'edge-handle');
                             h.setAttribute('cx', midX); h.setAttribute('cy', midY);
                             h.style.display = 'block';
-                            h.style.fill = '#cbd5e1'; // Grey for "potential" handle
+                            h.style.fill = '#cbd5e1';
 
                             h.addEventListener('mousedown', (e) => {
                                 e.stopPropagation();
-                                // Convert to real waypoint
                                 if (!edge.waypoints) edge.waypoints = [];
-                                // Insert logic: roughly where in the order?
-                                // Heuristic: dist from start
-                                // For now, push and sort by path distance? Or simpler: push.
-                                // Simple impl: Just add. User can drag it.
-                                // Better: Add at index corresponding to segment. 
-                                // But path segments are dynamic.
-                                // Just adding to end is risky.
-                                // Let's just add it.
                                 edge.waypoints.push({ x: midX, y: midY });
                                 state.isDragging = true;
                                 state.dragTarget = 'edge-handle';
@@ -1623,7 +1557,6 @@
                     }
                 }
 
-                // 2. Draw Label
                 if (edge.label) {
                     const labelGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     const center = getEdgeLabelPosition(d);
@@ -1658,30 +1591,27 @@
                 g.dataset.id = node.id;
 
                 let shape = null;
-                // SVG Icon rendering
+                // アイコン描画ロジック (塗りつぶし)
                 if (isIcon) {
-                    // Create an embedded SVG group for the icon
                     shape = document.createElementNS('http://www.w3.org/2000/svg', 'g');
                     let iconPath = '';
-                    // Simple definitions inline
+                    const color = node.bgColor === '#ffffff' ? '#334155' : node.bgColor;
+
                     if (node.type === 'icon-pc') {
-                        iconPath = `<rect x="2" y="3" width="20" height="14" rx="2" ry="2" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><line x1="8" y1="21" x2="16" y2="21" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><line x1="12" y1="17" x2="12" y2="21" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/>`;
+                        iconPath = `<path d="M20 17.575V4H4V17.575H20ZM22 2V19H13V21H16V23H8V21H11V19H2V2H22ZM6 6H18V15.5H6V6Z" fill="${color}"/><rect x="6" y="6" width="12" height="9.5" fill="${color}"/>`;
                     } else if (node.type === 'icon-doc') {
-                        iconPath = `<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><polyline points="14 2 14 8 20 8" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><line x1="16" y1="17" x2="8" y2="17" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/>`;
+                        iconPath = `<path d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8L14 2ZM13 9V3.5L18.5 9H13Z" fill="${color}"/>`;
                     } else if (node.type === 'icon-server') {
-                        iconPath = `<rect x="2" y="2" width="20" height="8" rx="2" ry="2" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><line x1="6" y1="6" x2="6.01" y2="6" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><line x1="6" y1="18" x2="6.01" y2="18" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/>`;
+                        iconPath = `<path d="M2 20V4H22V20H2ZM4 6V10H20V6H4ZM4 12V18H20V12H4ZM6 7V9H8V7H6ZM6 13V15H8V13H6Z" fill="${color}"/>`;
                     } else if (node.type === 'icon-user') {
-                        iconPath = `<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/><circle cx="12" cy="7" r="4" fill="none" stroke="${node.bgColor === '#ffffff' ? '#334155' : node.bgColor}" stroke-width="2"/>`;
+                        iconPath = `<path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="${color}"/>`;
                     }
 
-                    // Scale icon to fit node size
-                    // Base viewbox 24
                     const scaleX = node.w / 24;
                     const scaleY = node.h / 24;
                     shape.innerHTML = iconPath;
                     shape.setAttribute('transform', `scale(${scaleX}, ${scaleY})`);
 
-                    // Invisible hit rect
                     const hit = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
                     hit.setAttribute('width', 24); hit.setAttribute('height', 24);
                     hit.setAttribute('fill', 'transparent');
@@ -1727,14 +1657,8 @@
                     g.appendChild(shape);
                 }
 
-                // Label rendering
                 let textX = node.w / 2; let textY = isSwimlane ? 20 : node.h / 2; let anchor = 'middle';
-
-                // Icon label position: below icon
-                if (isIcon) {
-                    textY = node.h + 10;
-                }
-
+                if (isIcon) { textY = node.h + 10; }
                 if (isText) { textX = 0; textY = node.h / 2; anchor = 'start'; }
 
                 if (node.label) {
@@ -1761,9 +1685,7 @@
                     g.appendChild(text);
                 }
 
-                // PORTS: Add 3 ports per side for connection-enabled nodes
                 if (!isSwimlane && !isText && !isIcon) {
-                    // dirs with offsets. L=0.25, R=0.75
                     const dirs = [
                         'top-L', 'top', 'top-R',
                         'right-L', 'right', 'right-R',
@@ -1773,17 +1695,13 @@
 
                     dirs.forEach(dirStr => {
                         const p = getPortPos(node, dirStr);
-                        // Convert absolute to relative for drag start logic
                         const relX = p.x - node.x;
                         const relY = p.y - node.y;
 
                         const port = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                         port.setAttribute('class', 'port');
                         port.setAttribute('cx', relX); port.setAttribute('cy', relY);
-                        // Note: radius is set in CSS
-
                         port.addEventListener('mousedown', (e) => { e.stopPropagation(); startConnectionDrag(e, node, { x: relX, y: relY, dir: dirStr }); });
-                        // Quick add only on main ports (center) to avoid clutter
                         if (!dirStr.includes('-')) {
                             port.addEventListener('contextmenu', (e) => { e.preventDefault(); e.stopPropagation(); showQuickAddMenu(e, node, { dir: dirStr }); });
                         }
@@ -1811,7 +1729,6 @@
                 targetLayer.appendChild(g);
             });
 
-            // Quick Add Handles (only for single selection of standard nodes)
             if (state.selection.length === 1) {
                 const node = state.nodes.find(n => n.id === state.selection[0]);
                 if (node && !node.type.startsWith('icon-') && node.type !== 'swimlane' && node.type !== 'text') {
@@ -1855,9 +1772,19 @@
             const rawY = (e.touches && e.touches.length) ? e.touches[0].clientY : e.clientY;
             state.dragStart = { rawX, rawY };
             state.dragItemOffset = {};
+
+            // ノードのオフセット記録
             state.selection.forEach(id => {
                 const n = state.nodes.find(node => node.id === id);
                 if (n) state.dragItemOffset[id] = { x: n.x, y: n.y };
+            });
+
+            // 接続線追従移動の準備 (v7.1)
+            const selectedNodeIds = new Set(state.selection);
+            state.edges.forEach(edge => {
+                if (selectedNodeIds.has(edge.source) && selectedNodeIds.has(edge.target) && edge.waypoints) {
+                    state.dragItemOffset[`edge-wp-${edge.id}`] = JSON.parse(JSON.stringify(edge.waypoints));
+                }
             });
         }
         function startResizeDrag(e, node) {
@@ -1915,13 +1842,15 @@
             setTimeout(() => t.style.opacity = '0', 2000);
         }
         function setZoom(v) { state.zoom = Math.max(0.2, Math.min(3, v)); document.getElementById('zoom-level').textContent = Math.round(state.zoom * 100) + '%'; render(); }
-        function updateSelectedProps(key, value, isInt = false) {
+
+        // UPDATE: isNumeric (was isInt) and parseFloat for decimal stroke width
+        function updateSelectedProps(key, value, isNumeric = false) {
             let changed = false;
             state.selection.forEach(id => {
                 const n = state.nodes.find(node => node.id === id);
                 const e = state.edges.find(edge => edge.id === id);
                 const target = n || e;
-                if (target) { target[key] = isInt ? parseInt(value) : value; changed = true; }
+                if (target) { target[key] = isNumeric ? parseFloat(value) : value; changed = true; }
             });
             if (changed) render();
             return changed;
@@ -1962,7 +1891,7 @@
             swatch.addEventListener('click', () => {
                 const color = swatch.dataset.color;
                 updateSelectedProps('bgColor', color);
-                document.getElementById('prop-color').value = color; // sync input
+                document.getElementById('prop-color').value = color;
                 saveState();
             });
         });
@@ -1992,7 +1921,6 @@
                 if (type === 'db') { w = 60; h = 60; lbl = 'DB'; }
                 const offset = 80;
                 let nx = sourceNode.x, ny = sourceNode.y;
-                // Basic direction logic, ignoring precise port offsets for new node placement
                 const dir = state.quickAdd.portDir ? state.quickAdd.portDir.split('-')[0] : 'bottom';
 
                 if (dir === 'top') { nx += (sourceNode.w - w) / 2; ny -= (h + offset); }
@@ -2005,7 +1933,6 @@
                 if (dir === 'top') targetDir = 'bottom'; if (dir === 'bottom') targetDir = 'top'; if (dir === 'left') targetDir = 'right'; if (dir === 'right') targetDir = 'left';
 
                 state.nodes.push(newNode);
-                // Connect from specific port to center/standard port of new node
                 state.edges.push({ id: uuid(), source: sourceNode.id, sourcePort: state.quickAdd.portDir, target: newNode.id, targetPort: targetDir, label: '' });
                 state.selection = [newNode.id];
                 saveState(); render(); hideQuickAddMenu();
@@ -2022,6 +1949,8 @@
             if (state.dragTarget === 'node') {
                 const deltaX = (e.clientX - state.dragStart.rawX) / state.zoom;
                 const deltaY = (e.clientY - state.dragStart.rawY) / state.zoom;
+
+                // ノード移動
                 state.selection.forEach(id => {
                     const node = state.nodes.find(n => n.id === id);
                     if (node && state.dragItemOffset[id]) {
@@ -2029,6 +1958,22 @@
                         node.y = snap(state.dragItemOffset[id].y + deltaY);
                     }
                 });
+
+                // 追従するWaypoints移動
+                Object.keys(state.dragItemOffset).forEach(key => {
+                    if (key.startsWith('edge-wp-')) {
+                        const edgeId = key.replace('edge-wp-', '');
+                        const edge = state.edges.find(e => e.id === edgeId);
+                        const initialWPs = state.dragItemOffset[key];
+                        if (edge && initialWPs) {
+                            edge.waypoints = initialWPs.map(wp => ({
+                                x: snap(wp.x + deltaX),
+                                y: snap(wp.y + deltaY)
+                            }));
+                        }
+                    }
+                });
+
                 requestAnimationFrame(render);
             } else if (state.dragTarget === 'resize') {
                 const node = state.nodes.find(n => n.id === state.dragItemOffset.id);
@@ -2042,7 +1987,6 @@
             } else if (state.dragTarget === 'port') {
                 state.tempLine.setAttribute('x2', mouseX); state.tempLine.setAttribute('y2', mouseY);
             } else if (state.dragTarget === 'edge-handle') {
-                // Moving a waypoint
                 const edge = state.edges.find(e => e.id === state.draggingHandle.edgeId);
                 if (edge && edge.waypoints) {
                     const wp = edge.waypoints[state.draggingHandle.index];
@@ -2096,8 +2040,6 @@
 
         wrapperEl.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1) {
-                // Let D&D logic handle 1 finger tap on items if mapped, but if on bg...
-                // Currently using Mouse events mapped. But if dragging bg (pan):
                 if (e.target.id === 'main-svg' || e.target.id === 'bg-rect') {
                     startPan(e.touches[0]);
                 }
@@ -2114,7 +2056,7 @@
 
         wrapperEl.addEventListener('touchmove', (e) => {
             if (e.touches.length === 1 && state.dragTarget === 'pan') {
-                e.preventDefault(); // Stop scroll
+                e.preventDefault();
                 const touch = e.touches[0];
                 const dx = touch.clientX - state.dragStart.x;
                 const dy = touch.clientY - state.dragStart.y;
@@ -2154,7 +2096,7 @@
             if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && state.selection.length > 0) {
                 if (confirm('選択項目を削除しますか？')) {
                     state.nodes = state.nodes.filter(n => !state.selection.includes(n.id));
-                    state.edges = state.edges.filter(edge => !state.selection.includes(edge.id) && !state.selection.includes(edge.source) && !state.selection.includes(edge.target));
+                    state.edges = state.edges.filter(edge => !state.selection.includes(edge.source) && !state.selection.includes(edge.target));
                     state.selection = []; saveState(); render(); updatePropsPanel();
                 }
             }
@@ -2217,21 +2159,23 @@
             e.preventDefault(); const type = e.dataTransfer.getData('type'); if (!type) return;
             const pos = getMousePos(e);
             let w = 120, h = 60, lbl = '処理', bg = '#ffffff';
-            // Defaults for new types
+            let strokeW = 2; // Default stroke width
             if (type === 'circle') { w = 60; h = 60; lbl = '開始'; }
             else if (type === 'diamond') { w = 80; h = 80; lbl = '?'; }
             else if (type === 'db') { w = 60; h = 60; lbl = 'DB'; }
-            else if (type === 'swimlane') { w = 300; h = 400; lbl = '担当領域'; bg = '#f8fafc'; }
+            else if (type === 'swimlane') {
+                w = 300; h = 400; lbl = '担当領域'; bg = '#f8fafc';
+                strokeW = 0.5; // UPDATE: スイムレーンのデフォルト線幅を0.5に変更
+            }
             else if (type === 'text') { w = 120; h = 40; lbl = 'テキスト'; bg = 'transparent'; }
-            else if (type.startsWith('icon-')) { w = 48; h = 48; lbl = ''; bg = '#334155'; /* Icon default stroke color stored in bg for simplicity? or just default to dark */ }
+            else if (type.startsWith('icon-')) { w = 48; h = 48; lbl = ''; bg = '#334155'; }
 
-            // Icon specific labels
             if (type === 'icon-pc') lbl = '端末';
             if (type === 'icon-doc') lbl = '資料';
             if (type === 'icon-server') lbl = 'サーバー';
             if (type === 'icon-user') lbl = 'ユーザー';
 
-            const newNode = { id: uuid(), type: type, x: snap(pos.x - w / 2), y: snap(pos.y - h / 2), w: w, h: h, label: lbl, bgColor: bg, strokeWidth: 2 };
+            const newNode = { id: uuid(), type: type, x: snap(pos.x - w / 2), y: snap(pos.y - h / 2), w: w, h: h, label: lbl, bgColor: bg, strokeWidth: strokeW };
             state.nodes.push(newNode); saveState(); state.selection = [newNode.id]; render();
         });
 
@@ -2290,7 +2234,7 @@
         }
         document.getElementById('export-png').addEventListener('click', () => exportImage('image/png'));
         document.getElementById('export-jpeg').addEventListener('click', () => exportImage('image/jpeg'));
-        document.getElementById('export-svg').addEventListener('click', () => exportImage('image/svg+xml')); // SVG Handler
+        document.getElementById('export-svg').addEventListener('click', () => exportImage('image/svg+xml'));
 
         document.getElementById('btn-import').addEventListener('click', () => document.getElementById('file-input').click());
         document.getElementById('file-input').addEventListener('change', (e) => {
