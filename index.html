@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BizFlow Designer (v7.4 Fixed)</title>
+    <title>BizFlow Designer (v7.4 Improved)</title>
     <style>
         /* =========================================
            CSS Reset & Variables
@@ -791,11 +791,52 @@
             height: 200px;
             margin: 10px 0;
             padding: 10px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid #444;
+            /* Darker border */
             border-radius: 4px;
-            font-family: monospace;
+            font-family: 'Consolas', 'Monaco', monospace;
+            /* Monospace font */
             font-size: 0.9rem;
             resize: vertical;
+            background-color: #1e1e1e;
+            /* Dark background */
+            color: #f0f0f0;
+            /* Light text */
+        }
+
+        /* Improved Instruction Box Style */
+        .instruction-box {
+            background-color: #eff6ff;
+            /* Light blue background */
+            border-left: 4px solid #3b82f6;
+            /* Accent border */
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .instruction-step {
+            display: flex;
+            margin-bottom: 6px;
+            align-items: baseline;
+        }
+
+        .instruction-step-num {
+            font-weight: bold;
+            color: #3b82f6;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .instruction-highlight {
+            font-weight: bold;
+            color: #1d4ed8;
+            background: #dbeafe;
+            padding: 0 4px;
+            border-radius: 2px;
         }
 
         /* Print */
@@ -1210,9 +1251,28 @@
     <div id="ai-prompt-modal" class="modal-overlay">
         <div class="modal-content">
             <h3 style="margin-bottom: 10px; font-weight: bold; color: #334155;">AIプロンプト作成テンプレート</h3>
-            <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 10px;">
-                以下のテキストをコピーして、ChatGPTやClaudeなどのAIに貼り付けて指示を出してください。
-            </p>
+
+            <div class="instruction-box">
+                <div class="instruction-step">
+                    <span class="instruction-step-num">1.</span>
+                    <span>下の黒い画面にある <span class="instruction-highlight">{{{{{ここに業務フローの内容を記述}}}}}</span>
+                        の部分を、実際の業務内容（例：メールを受信したら確認する等）に書き換えてください。</span>
+                </div>
+                <div class="instruction-step">
+                    <span class="instruction-step-num">2.</span>
+                    <span>書き換えたら全文をコピーし、ChatGPTなどのAIに貼り付けて指示を出してください。</span>
+                </div>
+                <div class="instruction-step">
+                    <span class="instruction-step-num">3.</span>
+                    <span>AIが作成したコードを <span class="instruction-highlight">.json</span> という拡張子（例:
+                        flow.json）でPCに保存してください。</span>
+                </div>
+                <div class="instruction-step">
+                    <span class="instruction-step-num">4.</span>
+                    <span>この画面上部の「JSONから読込」ボタンから、保存したファイルを読み込んでください。</span>
+                </div>
+            </div>
+
             <textarea id="ai-prompt-text" class="modal-textarea">
 # **業務フローの内容**
 
@@ -2326,7 +2386,12 @@
             if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && state.selection.length > 0) {
                 if (confirm('選択項目を削除しますか？')) {
                     state.nodes = state.nodes.filter(n => !state.selection.includes(n.id));
-                    state.edges = state.edges.filter(edge => !state.selection.includes(edge.source) && !state.selection.includes(edge.target));
+                    // 修正: エッジ自身のIDが含まれている場合も削除対象とする
+                    state.edges = state.edges.filter(edge =>
+                        !state.selection.includes(edge.id) &&
+                        !state.selection.includes(edge.source) &&
+                        !state.selection.includes(edge.target)
+                    );
                     state.selection = []; saveState(); render(); updatePropsPanel();
                 }
             }
@@ -2351,8 +2416,9 @@
                     state.nodes.push(...nn); state.edges.push(...ne); state.selection = ns; saveState(); render(); showToast('貼り付けました');
                 }
             }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); undo(); }
-            if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
+            // UPDATE: Fix Undo/Redo hijack
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !isInput) { e.preventDefault(); undo(); }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'y' && !isInput) { e.preventDefault(); redo(); }
         });
         window.addEventListener('keyup', (e) => { if (e.code === 'Space') wrapperEl.style.cursor = 'default'; });
 
