@@ -1,4 +1,4 @@
-# BizFlow Designer ユーザーマニュアル
+# BizFlow Designer
 
 ## 1\. 概要
 
