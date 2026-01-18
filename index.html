@@ -117,20 +117,27 @@
             margin-top: 0.25rem;
         }
 
+        /* Update: 2-column Grid Layout */
         .stencil-content {
             overflow-y: auto;
             flex: 1;
             padding: 1rem;
             background: var(--panel-bg);
             min-height: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            align-content: start;
         }
 
         .group-title {
             font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             margin-top: 1rem;
+            grid-column: 1 / -1;
+            /* Span full width */
         }
 
         .group-title:first-child {
@@ -141,13 +148,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 0.75rem;
+            padding: 0.5rem;
             border: 1px solid var(--border-color);
             border-radius: 0.5rem;
             background: white;
             cursor: grab;
             transition: all 0.2s;
-            margin-bottom: 0.75rem;
+            /* margin-bottom is handled by grid gap */
         }
 
         .dnd-item:hover {
@@ -234,6 +241,7 @@
             font-size: 0.75rem;
             font-weight: 500;
             margin-top: 0.5rem;
+            text-align: center;
         }
 
         /* =========================================
@@ -925,19 +933,19 @@
 
             <div class="stencil-content">
                 <div class="group-title">ノード</div>
-                <div class="dnd-item" draggable="true" data-type="circle" title="開始/終了">
+                <div class="dnd-item" draggable="true" data-type="circle" title="開始/終了: フローの開始点や終了点を表します">
                     <div class="shape-preview shape-circle"></div>
                     <span class="item-label">開始 / 終了</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="rect" title="処理">
+                <div class="dnd-item" draggable="true" data-type="rect" title="処理: 業務の作業やアクションを表します">
                     <div class="shape-preview shape-rect"></div>
                     <span class="item-label">処理</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="diamond" title="判断">
+                <div class="dnd-item" draggable="true" data-type="diamond" title="判断: 条件による分岐点（Yes/Noなど）を表します">
                     <div class="shape-preview shape-diamond"></div>
                     <span class="item-label">判断</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="db" title="データストア">
+                <div class="dnd-item" draggable="true" data-type="db" title="データストア: データの保管や参照を表します">
                     <div class="svg-icon-container">
                         <svg viewBox="0 0 40 40">
                             <path
@@ -947,14 +955,14 @@
                     </div>
                     <span class="item-label">データストア</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="text" title="テキスト">
+                <div class="dnd-item" draggable="true" data-type="text" title="テキスト: 注釈やコメントを記入します">
                     <div class="shape-text">T</div>
                     <span class="item-label">テキスト</span>
                 </div>
 
                 <!-- アイコン -->
-                <div class="group-title">アイコン (改良版)</div>
-                <div class="dnd-item" draggable="true" data-type="icon-pc" title="パソコン">
+                <div class="group-title">アイコン</div>
+                <div class="dnd-item" draggable="true" data-type="icon-pc" title="パソコン: 端末操作やシステム利用を表します">
                     <div class="svg-icon-container">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -964,7 +972,7 @@
                     </div>
                     <span class="item-label">パソコン</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="icon-doc" title="書類">
+                <div class="dnd-item" draggable="true" data-type="icon-doc" title="書類: 帳票やドキュメントを表します">
                     <div class="svg-icon-container">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -973,7 +981,7 @@
                     </div>
                     <span class="item-label">書類</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="icon-server" title="サーバー">
+                <div class="dnd-item" draggable="true" data-type="icon-server" title="サーバー: システム処理やバックエンドを表します">
                     <div class="svg-icon-container">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path d="M2 20V4H22V20H2ZM4 6V10H20V6H4ZM4 12V18H20V12H4ZM6 7V9H8V7H6ZM6 13V15H8V13H6Z" />
@@ -981,7 +989,7 @@
                     </div>
                     <span class="item-label">サーバー</span>
                 </div>
-                <div class="dnd-item" draggable="true" data-type="icon-user" title="ユーザー">
+                <div class="dnd-item" draggable="true" data-type="icon-user" title="ユーザー: 作業者や担当者を表します">
                     <div class="svg-icon-container">
                         <svg viewBox="0 0 24 24" fill="currentColor">
                             <path
@@ -992,13 +1000,13 @@
                 </div>
 
                 <div class="group-title">コンテナ</div>
-                <div class="dnd-item" draggable="true" data-type="swimlane" title="担当領域">
+                <div class="dnd-item" draggable="true" data-type="swimlane" title="担当領域: 部署や役割ごとの区分け（レーン）を作成します">
                     <div class="shape-preview shape-swimlane">
                         <div class="swimlane-line"></div>
                     </div>
                     <span class="item-label">担当領域</span>
                 </div>
-                <div style="height: 50px;"></div>
+                <div style="height: 50px; grid-column: 1/-1;"></div>
             </div>
         </div>
 
@@ -1306,7 +1314,7 @@
   * `rect`: 処理 (サイズ推奨: w:120, h:60)  
   * `diamond`: 判断 (サイズ推奨: w:80, h:80)  
   * `db`: データストア (サイズ推奨: w:60, h:60)  
-  * `swimlane`: 担当領域/スイムレーン (サイズ推奨: w:300\~600, h:400)  
+  * `swimlane`: 担当領域/スイムレーン (サイズ推奨: w:300\~600, h:400, 枠線太さ推奨: 0.5)  
   * `text`: テキストメモ  
   * `icon-pc`: PCアイコン  
   * `icon-doc`: 書類アイコン  
@@ -1370,9 +1378,12 @@
   \]  
 }
             </textarea>
-            <div class="flex justify-end gap-2" style="justify-content: flex-end;">
-                <button id="btn-copy-prompt" class="btn-text btn-primary">コピー</button>
-                <button id="btn-close-modal" class="btn-text btn-secondary">閉じる</button>
+            <div class="flex" style="justify-content: space-between; align-items: center;">
+                <button id="btn-reset-prompt" class="btn-text btn-danger" style="margin-right: auto;">元に戻す</button>
+                <div class="flex gap-2">
+                    <button id="btn-copy-prompt" class="btn-text btn-primary">コピー</button>
+                    <button id="btn-close-modal" class="btn-text btn-secondary">閉じる</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1384,6 +1395,9 @@
         const GRID_SIZE = 10;
         const STORAGE_KEY = 'bizflow_offline_data_v7';
         const MIN_SIZE = 24;
+
+        // Default AI Prompt Template
+        const DEFAULT_AI_PROMPT = `# **業務フローの内容**\n\n{{{{{ここに業務フローの内容を記述}}}}} (例：社内のPCセットアップ業務。管理者がPCを準備し、ユーザーに書類を渡す。その後ユーザーが受領確認を行う。)\n\n# **命令**\n\nあなたは業務フロー図作成ツール「BizFlow Designer」のデータ生成エンジンです。 上記の【業務フローの内容】を読み解き、定義された【JSONフォーマット仕様】に厳密に従ってJSONデータを出力してください。\n\n# **制約条件とルール**\n\n1. **座標計算（重要）**:  \n   * 各ノードは重ならないように配置すること。  \n   * 業務の流れに従って、**左から右へ**、または**上から下へ**順序よく座標(x, y)を計算して設定すること。  \n   * 座標は \`x: 0, y: 0\` から \`x: 800, y: 600\` 程度の範囲に収めること。  \n2. **配線の最適化（重要）**:  \n   * 複数の接続線が特定の図形に集中する場合、線が重なって視認性が落ちるのを防ぐため、後述する\\*\\*拡張ポート（\`top-L\`, \`top-R\`など）\\*\\*を積極的に使い分けること。  \n3. **ID**: 全てユニークな文字列にすること（例: \`node_1\`, \`edge_1\`）。  \n4. **JSON形式**: 出力はJSONデータのみとすること（解説不要）。\n\n# **JSONフォーマット仕様**\n\n以下の仕様に従ってください。\n\n## **1\\. ノード定義 (nodes)**\n\n各図形は以下のプロパティを持ちます。\n\n* \`type\`: 図形の種類（以下のリストから適切なものを選択）  \n  * \`circle\`: 開始 / 終了 (サイズ推奨: w:60, h:60)  \n  * \`rect\`: 処理 (サイズ推奨: w:120, h:60)  \n  * \`diamond\`: 判断 (サイズ推奨: w:80, h:80)  \n  * \`db\`: データストア (サイズ推奨: w:60, h:60)  \n  * \`swimlane\`: 担当領域/スイムレーン (サイズ推奨: w:300\\~600, h:400)  \n  * \`text\`: テキストメモ  \n  * \`icon-pc\`: PCアイコン  \n  * \`icon-doc\`: 書類アイコン  \n  * \`icon-server\`: サーバーアイコン  \n  * \`icon-user\`: ユーザーアイコン  \n* \`x\`, \`y\`: 配置座標 (数値)  \n* \`w\`, \`h\`: 幅と高さ (数値)  \n  * **注記**: 上記の推奨サイズはあくまで目安です。ラベルの文字数が多い場合や、レイアウトの規模・内容に応じて、**視認しやすいサイズに適宜変更・拡大しても構いません**。  \n* \`label\`: 表示するテキスト (改行は \`\\n\`)  \n* \`bgColor\`: 背景色 (任意。例: \`#ffffff\`, \`#dbeafe\`(青系), \`#ffe4e6\`(赤系))\n\n## **2\\. 接続定義 (edges)**\n\nノード間の接続線です。各図形の4面（上下左右）には、それぞれ3つずつの接続点（ポート）が存在します。\n\n* \`source\`: 接続元のノードID  \n* \`target\`: 接続先のノードID  \n* \`sourcePort\`, \`targetPort\`: 接続位置  \n  * 以下の12種類から選択可能です。線が重ならないように使い分けてください。  \n  * **上辺**: \`top\` (中央), \`top-L\` (左寄り), \`top-R\` (右寄り)  \n  * **下辺**: \`bottom\` (中央), \`bottom-L\` (左寄り), \`bottom-R\` (右寄り)  \n  * **左辺**: \`left\` (中央), \`left-L\` (上寄り), \`left-R\` (下寄り)  \n  * **右辺**: \`right\` (中央), \`right-L\` (上寄り), \`right-R\` (下寄り)  \n  * ※ \`-L\` や \`-R\` は、その辺に向かって立ったときの左右を指します（例: \`top-L\` は上辺の左側）。  \n* \`label\`: 線の上に表示する文字（条件分岐の「Yes/No」など）\n\n# **出力JSONスキーマ**\n\n{  \n  \"nodes\": \\[  \n    {  \n      \"id\": \"node\\_start\",  \n      \"type\": \"circle\",  \n      \"x\": 100,  \n      \"y\": 100,  \n      \"w\": 60,  \n      \"h\": 60,  \n      \"label\": \"開始\",  \n      \"bgColor\": \"\\#ffffff\"  \n    }  \n    // ...他のノード  \n  \\],  \n  \"edges\": \\[  \n    {  \n      \"id\": \"edge\\_1\",  \n      \"source\": \"node\\_start\",  \n      \"sourcePort\": \"right\",   \n      \"target\": \"node\\_process\\_1\",  \n      \"targetPort\": \"left-L\",   \n      \"label\": \"\"  \n    },  \n    {  \n      \"id\": \"edge\\_2\",  \n      \"source\": \"node\\_start\",  \n      \"sourcePort\": \"right\",   \n      \"target\": \"node\\_process\\_2\",  \n      \"targetPort\": \"left-R\",   \n      \"label\": \"\"  \n    }  \n    // ...他のエッジ  \n  \\]  \n}`;
 
         // Global State
         const state = {
@@ -2123,6 +2137,14 @@
             document.execCommand('copy');
             showToast('コピーしました');
         });
+
+        // New: Reset Prompt Logic
+        document.getElementById('btn-reset-prompt').addEventListener('click', () => {
+            const textarea = document.getElementById('ai-prompt-text');
+            textarea.value = DEFAULT_AI_PROMPT;
+            showToast('初期文に戻しました');
+        });
+
         modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
         // UPDATE: Export Menu Positioning Logic (Fix for overflow clipping)
@@ -2384,16 +2406,15 @@
                 render(); updatePropsPanel();
             }
             if ((e.key === 'Delete' || e.key === 'Backspace') && !isInput && state.selection.length > 0) {
-                if (confirm('選択項目を削除しますか？')) {
-                    state.nodes = state.nodes.filter(n => !state.selection.includes(n.id));
-                    // 修正: エッジ自身のIDが含まれている場合も削除対象とする
-                    state.edges = state.edges.filter(edge =>
-                        !state.selection.includes(edge.id) &&
-                        !state.selection.includes(edge.source) &&
-                        !state.selection.includes(edge.target)
-                    );
-                    state.selection = []; saveState(); render(); updatePropsPanel();
-                }
+                // UPDATE: Remove confirm dialog for single deletion
+                state.nodes = state.nodes.filter(n => !state.selection.includes(n.id));
+                // 修正: エッジ自身のIDが含まれている場合も削除対象とする
+                state.edges = state.edges.filter(edge =>
+                    !state.selection.includes(edge.id) &&
+                    !state.selection.includes(edge.source) &&
+                    !state.selection.includes(edge.target)
+                );
+                state.selection = []; saveState(); render(); updatePropsPanel();
             }
             if ((e.ctrlKey || e.metaKey) && e.key === 'c' && !isInput) {
                 if (state.selection.length > 0) {
